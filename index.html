@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSE Iron Rules Portfolio Tracker</title>
+    <title>CSE Iron Rules & Real Value Portfolio Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -21,8 +21,8 @@
                 <h1 class="text-3xl font-black tracking-tight text-white mt-2">CSE Iron Rules & Real Value Monitor</h1>
             </div>
             <div class="flex flex-wrap gap-2">
-                <button onclick="toggleInflationView()" id="inflation-btn" class="bg-purple-900/40 hover:bg-purple-800/60 text-purple-300 text-sm font-semibold px-4 py-2 rounded-lg border border-purple-700/50 transition-all">
-                    🔥 View: Nominal
+                <button onclick="toggleInflationView()" id="inflation-btn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold px-4 py-2 rounded-lg border border-slate-700 transition-all">
+                    📈 View: Nominal
                 </button>
                 <button onclick="refreshPrices()" class="bg-slate-800 hover:bg-slate-700 text-sm px-4 py-2 rounded-lg border border-slate-700 font-medium">🔄 Refresh</button>
                 <button onclick="openModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-lg shadow-emerald-900/30">+ Add Stock</button>
@@ -46,7 +46,7 @@
                 <input id="inflation-rate" type="number" step="0.1" value="4.5" onchange="saveSettings()" class="w-16 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-center font-bold text-purple-400">
             </div>
 
-            <!-- Real vs Nominal Indicator Status -->
+            <!-- Status Indicator -->
             <div class="flex items-center justify-between bg-slate-950/60 p-3 rounded-lg border border-slate-800/80">
                 <span class="text-slate-400">P&L Calculation Mode:</span>
                 <span id="mode-badge" class="px-2.5 py-0.5 rounded font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">Nominal LKR</span>
@@ -118,61 +118,29 @@
 
     <!-- Modal for Adding / Editing Stock -->
     <div id="stockModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 border border-slate-700 p-6 rounded-xl w-full max-w-md shadow-2xl">
+        <div class="bg-slate-900 border border-slate-700 p-6 rounded-xl w-full max-w-md shadow-2xl relative">
             <h2 id="modal-title" class="text-xl font-bold mb-4 text-white">Add CSE Stock Position</h2>
             <div class="space-y-4">
-                <div>
-                    <label class="text-xs text-slate-400">Select CSE Stock</label>
-                    <select id="ticker-select" onchange="onTickerChange()" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 text-slate-200 focus:border-emerald-500 outline-none">
-                        <option value="">-- Select or Choose Custom --</option>
-                        <optgroup label="Banking & Finance">
-                            <option value="COMB.N0000" data-name="Commercial Bank">COMB - Commercial Bank</option>
-                            <option value="SAMP.N0000" data-name="Sampath Bank">SAMP - Sampath Bank</option>
-                            <option value="HNB.N0000" data-name="Hatton National Bank">HNB - Hatton National Bank</option>
-                            <option value="NTB.N0000" data-name="Nations Trust Bank">NTB - Nations Trust Bank</option>
-                            <option value="SEYB.N0000" data-name="Seylan Bank">SEYB - Seylan Bank</option>
-                            <option value="DFCC.N0000" data-name="DFCC Bank">DFCC - DFCC Bank</option>
-                            <option value="PABC.N0000" data-name="Pan Asia Banking">PABC - Pan Asia Bank</option>
-                            <option value="LOLC.N0000" data-name="LOLC Holdings">LOLC - LOLC Holdings</option>
-                        </optgroup>
-                        <optgroup label="Conglomerates & Diversified">
-                            <option value="JKH.N0000" data-name="John Keells Holdings">JKH - John Keells Holdings</option>
-                            <option value="HAYL.N0000" data-name="Hayleys PLC">HAYL - Hayleys PLC</option>
-                            <option value="BIL.N0000" data-name="Browns Investments">BIL - Browns Investments</option>
-                            <option value="MELS.N0000" data-name="Melstacorp">MELS - Melstacorp</option>
-                            <option value="HHL.N0000" data-name="Hemas Holdings">HHL - Hemas Holdings</option>
-                            <option value="VONE.N0000" data-name="Vallibel One">VONE - Vallibel One</option>
-                            <option value="SPEN.N0000" data-name="Aitken Spence">SPEN - Aitken Spence</option>
-                            <option value="RICH.N0000" data-name="Richard Pieris">RICH - Richard Pieris</option>
-                        </optgroup>
-                        <optgroup label="Energy & Materials">
-                            <option value="LIOC.N0000" data-name="Lanka IOC">LIOC - Lanka IOC</option>
-                            <option value="WIND.N0000" data-name="WindForce PLC">WIND - WindForce PLC</option>
-                            <option value="LGL.N0000" data-name="Laughfs Gas">LGL - Laughfs Gas</option>
-                            <option value="TKYO.N0000" data-name="Tokyo Cement">TKYO - Tokyo Cement</option>
-                            <option value="RCL.N0000" data-name="Royal Ceramics">RCL - Royal Ceramics</option>
-                            <option value="DIPD.N0000" data-name="Dipped Products">DIPD - Dipped Products</option>
-                        </optgroup>
-                        <optgroup label="Telecom & Consumer">
-                            <option value="DIAL.N0000" data-name="Dialog Axiata">DIAL - Dialog Axiata</option>
-                            <option value="SLTL.N0000" data-name="Sri Lanka Telecom">SLTL - Sri Lanka Telecom</option>
-                            <option value="CTC.N0000" data-name="Ceylon Tobacco">CTC - Ceylon Tobacco</option>
-                            <option value="LION.N0000" data-name="Lion Brewery">LION - Lion Brewery</option>
-                            <option value="NEST.N0000" data-name="Nestle Lanka">NEST - Nestle Lanka</option>
-                            <option value="CARG.N0000" data-name="Cargills Ceylon">CARG - Cargills Ceylon</option>
-                        </optgroup>
-                        <option value="CUSTOM">-- Custom / Other Ticker --</option>
-                    </select>
+                
+                <!-- Searchable Stock Autocomplete -->
+                <div class="relative">
+                    <label class="text-xs text-slate-400">Search CSE Listed Stock (Ticker or Name)</label>
+                    <input id="ticker-search" type="text" oninput="filterTickers()" placeholder="e.g. JKH, Commercial Bank, LIOC..." class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 text-slate-200 focus:border-emerald-500 outline-none">
+                    
+                    <!-- Search Results Dropdown -->
+                    <div id="ticker-results" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-slate-900 border border-slate-700 rounded-lg shadow-2xl z-50 divide-y divide-slate-800">
+                        <!-- Filtered list injected here -->
+                    </div>
                 </div>
 
-                <div id="custom-ticker-box" class="hidden">
-                    <label class="text-xs text-slate-400">Custom Symbol (e.g. EXPO.N0000)</label>
-                    <input id="custom_symbol" type="text" placeholder="EXPO.N0000" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
+                <div>
+                    <label class="text-xs text-slate-400">Ticker Symbol</label>
+                    <input id="symbol" type="text" placeholder="JKH.N0000" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none uppercase font-mono">
                 </div>
 
                 <div>
                     <label class="text-xs text-slate-400">Company Name</label>
-                    <input id="name" type="text" placeholder="Company Name" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
+                    <input id="name" type="text" placeholder="John Keells Holdings PLC" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
@@ -200,6 +168,170 @@
     </div>
 
     <script>
+        // Comprehensive CSE Ticker Database
+        const CSE_ALL_TICKERS = [
+            // Banking, Finance & Insurance
+            { symbol: "COMB.N0000", name: "Commercial Bank of Ceylon (Voting)" },
+            { symbol: "COMB.X0000", name: "Commercial Bank of Ceylon (Non-Voting)" },
+            { symbol: "SAMP.N0000", name: "Sampath Bank PLC" },
+            { symbol: "HNB.N0000", name: "Hatton National Bank (Voting)" },
+            { symbol: "HNB.X0000", name: "Hatton National Bank (Non-Voting)" },
+            { symbol: "NTB.N0000", name: "Nations Trust Bank PLC" },
+            { symbol: "SEYB.N0000", name: "Seylan Bank (Voting)" },
+            { symbol: "SEYB.X0000", name: "Seylan Bank (Non-Voting)" },
+            { symbol: "DFCC.N0000", name: "DFCC Bank PLC" },
+            { symbol: "PABC.N0000", name: "Pan Asia Banking Corporation" },
+            { symbol: "NDB.N0000", name: "National Development Bank PLC" },
+            { symbol: "UBC.N0000", name: "Union Bank of Colombo" },
+            { symbol: "LOLC.N0000", name: "LOLC Holdings PLC" },
+            { symbol: "LOFC.N0000", name: "LOLC Finance PLC" },
+            { symbol: "CDB.N0000", name: "Citizens Development Business Finance" },
+            { symbol: "CDB.X0000", name: "Citizens Development Business (Non-Voting)" },
+            { symbol: "CFIN.N0000", name: "Central Finance Company" },
+            { symbol: "LFIN.N0000", name: "LB Finance PLC" },
+            { symbol: "PLC.N0000", name: "People's Leasing & Finance" },
+            { symbol: "VFIN.N0000", name: "Vallibel Finance PLC" },
+            { symbol: "SFIN.N0000", name: "Singer Finance Lanka" },
+            { symbol: "CALT.N0000", name: "Capital Alliance PLC" },
+            { symbol: "FCT.N0000", name: "First Capital Holdings PLC" },
+            { symbol: "COCR.N0000", name: "Commercial Credit and Finance" },
+            { symbol: "ALLI.N0000", name: "Alliance Finance Company" },
+            { symbol: "MERC.N0000", name: "Mercantile Investments" },
+            { symbol: "AAIC.N0000", name: "Softlogic Life Insurance" },
+            { symbol: "JINS.N0000", name: "Janashakthi Insurance PLC" },
+            { symbol: "CINS.N0000", name: "Ceylinco Insurance (Voting)" },
+            { symbol: "CINS.X0000", name: "Ceylinco Insurance (Non-Voting)" },
+            { symbol: "UAL.N0000", name: "Union Assurance PLC" },
+            { symbol: "HNBAC.N0000", name: "HNB Assurance PLC" },
+            { symbol: "SLIC.N0000", name: "Sri Lanka Insurance Corporation" },
+
+            // Diversified & Conglomerates
+            { symbol: "JKH.N0000", name: "John Keells Holdings PLC" },
+            { symbol: "HAYL.N0000", name: "Hayleys PLC" },
+            { symbol: "BIL.N0000", name: "Browns Investments PLC" },
+            { symbol: "BRWN.N0000", name: "Brown & Company PLC" },
+            { symbol: "MELS.N0000", name: "Melstacorp PLC" },
+            { symbol: "HHL.N0000", name: "Hemas Holdings PLC" },
+            { symbol: "VONE.N0000", name: "Vallibel One PLC" },
+            { symbol: "SPEN.N0000", name: "Aitken Spence PLC" },
+            { symbol: "RICH.N0000", name: "Richard Pieris and Company" },
+            { symbol: "EXPO.N0000", name: "Expolanka Holdings PLC" },
+            { symbol: "SUN.N0000", name: "Sunshine Holdings PLC" },
+            { symbol: "CIND.N0000", name: "Ceylon Investment PLC" },
+            { symbol: "CINV.N0000", name: "Ceylon Guardian Investment Trust" },
+            { symbol: "SHL.N0000", name: "Softlogic Holdings PLC" },
+            { symbol: "AMBE.N0000", name: "Ambeon Capital PLC" },
+            { symbol: "ASIY.N0000", name: "Asia Asset Finance" },
+            { symbol: "RENU.N0000", name: "Renuka Holdings PLC" },
+            { symbol: "RHL.N0000", name: "RIL Property PLC" },
+            { symbol: "CTHR.N0000", name: "C T Holdings PLC" },
+
+            // Energy, Materials & Industrial Manufacturing
+            { symbol: "LIOC.N0000", name: "Lanka IOC PLC" },
+            { symbol: "LGL.N0000", name: "LAUGFS Gas PLC (Voting)" },
+            { symbol: "LGL.X0000", name: "LAUGFS Gas PLC (Non-Voting)" },
+            { symbol: "WIND.N0000", name: "WindForce PLC" },
+            { symbol: "HPWR.N0000", name: "Lotus Hydroelectric / HPWR" },
+            { symbol: "PAP.N0000", name: "Panasian Power PLC" },
+            { symbol: "LVL.N0000", name: "LVL Energy Fund PLC" },
+            { symbol: "VPEL.N0000", name: "Vallibel Power Erathna" },
+            { symbol: "RCL.N0000", name: "Royal Ceramics Lanka PLC" },
+            { symbol: "TKYO.N0000", name: "Tokyo Cement Company (Voting)" },
+            { symbol: "TKYO.X0000", name: "Tokyo Cement Company (Non-Voting)" },
+            { symbol: "ACL.N0000", name: "ACL Cables PLC" },
+            { symbol: "AEL.N0000", name: "Access Engineering PLC" },
+            { symbol: "DIPD.N0000", name: "Dipped Products PLC" },
+            { symbol: "TJL.N0000", name: "Teejay Lanka PLC" },
+            { symbol: "LLUB.N0000", name: "Chevron Lubricants Lanka" },
+            { symbol: "ALUM.N0000", name: "Alumex PLC" },
+            { symbol: "DOCK.N0000", name: "Colombo Dockyard PLC" },
+            { symbol: "LANK.N0000", name: "Lanka Walltiles PLC" },
+            { symbol: "PARQ.N0000", name: "Swisstek (Ceylon) PLC" },
+            { symbol: "GLAS.N0000", name: "PGP Glass Ceylon PLC" },
+            { symbol: "PACK.N0000", name: "Ex-pack Corrugated Cartons" },
+            { symbol: "REXP.N0000", name: "Resus Energy PLC" },
+            { symbol: "AGST.N0000", name: "Agstar PLC" },
+            { symbol: "CERA.N0000", name: "Lanka Ceramic PLC" },
+            { symbol: "BOPL.N0000", name: "Bogala Graphite Lanka" },
+
+            // Food, Beverage, Tobacco & Agriculture
+            { symbol: "CTC.N0000", name: "Ceylon Tobacco Company PLC" },
+            { symbol: "DIST.N0000", name: "Distilleries Company of Sri Lanka" },
+            { symbol: "LION.N0000", name: "Lion Brewery Ceylon PLC" },
+            { symbol: "CARG.N0000", name: "Cargills (Ceylon) PLC" },
+            { symbol: "NEST.N0000", name: "Nestle Lanka PLC" },
+            { symbol: "CCS.N0000", name: "Ceylon Cold Stores PLC" },
+            { symbol: "KFP.N0000", name: "Keells Food Products" },
+            { symbol: "LMF.N0000", name: "Lanka Milk Foods PLC" },
+            { symbol: "SOY.N0000", name: "Convenience Foods Lanka" },
+            { symbol: "BFL.N0000", name: "Bairaha Farms PLC" },
+            { symbol: "GRAN.N0000", name: "Ceylon Grain Elevators PLC" },
+            { symbol: "TAFL.N0000", name: "Three Acre Farms PLC" },
+            { symbol: "WATA.N0000", name: "Watawala Plantations PLC" },
+            { symbol: "KELN.N0000", name: "Kelani Valley Plantations" },
+            { symbol: "DPL.N0000", name: "Dipped Products Plantations" },
+            { symbol: "ELP.N0000", name: "Elpitiya Plantations PLC" },
+            { symbol: "AGAL.N0000", name: "Agalawatte Plantations" },
+            { symbol: "BOGA.N0000", name: "Bogawantalawa Tea Estates" },
+            { symbol: "HOPL.N0000", name: "Horana Plantations PLC" },
+            { symbol: "KOTA.N0000", name: "Kotagala Plantations PLC" },
+            { symbol: "MADU.N0000", name: "Madulsima Plantations PLC" },
+            { symbol: "MASK.N0000", name: "Maskeliya Plantations PLC" },
+            { symbol: "MAL.N0000", name: "Malwatte Valley Plantations" },
+            { symbol: "NAMU.N0000", name: "Namunukula Plantations PLC" },
+            { symbol: "TAL.N0000", name: "Talawakelle Tea Estates" },
+            { symbol: "UDAP.N0000", name: "Udapussellawa Plantations" },
+            { symbol: "BALA.N0000", name: "Balangoda Plantations PLC" },
+            { symbol: "HEXP.N0000", name: "Hayleys Fabric PLC" },
+
+            // Telecommunications & Technology
+            { symbol: "DIAL.N0000", name: "Dialog Axiata PLC" },
+            { symbol: "SLTL.N0000", name: "Sri Lanka Telecom PLC" },
+            { symbol: "ECL.N0000", name: "E - Channelling PLC" },
+
+            // Healthcare & Pharmaceuticals
+            { symbol: "ASIR.N0000", name: "Asiri Hospital Holdings PLC" },
+            { symbol: "AMSL.N0000", name: "Asiri Surgical Hospital PLC" },
+            { symbol: "CHL.N0000", name: "Ceylon Hospitals PLC (Durdans)" },
+            { symbol: "CHL.X0000", name: "Ceylon Hospitals (Non-Voting)" },
+            { symbol: "LHCL.N0000", name: "Lanka Hospitals Corporation" },
+            { symbol: "NHL.N0000", name: "Nawaloka Hospitals PLC" },
+            { symbol: "MULL.N0000", name: "Muller & Phipps Ceylon" },
+
+            // Consumer Retail & Services
+            { symbol: "ODEL.N0000", name: "ODEL PLC" },
+            { symbol: "SINS.N0000", name: "Singer (Sri Lanka) PLC" },
+            { symbol: "ABAN.N0000", name: "Abans Electricals PLC" },
+            { symbol: "SING.N0000", name: "Singer Industries Ceylon" },
+            { symbol: "KAPI.N0000", name: "Kapruka Holdings PLC" },
+            { symbol: "TESS.N0000", name: "Tess Agro PLC" },
+
+            // Hotels, Tourism & Leisure
+            { symbol: "AHUN.N0000", name: "Aitken Spence Hotel Holdings" },
+            { symbol: "AHOT.N0000", name: "Asian Hotels and Properties" },
+            { symbol: "KHL.N0000", name: "John Keells Hotels PLC" },
+            { symbol: "TRAN.N0000", name: "Trans Asia Hotels PLC" },
+            { symbol: "EDEN.N0000", name: "Eden Hotel Lanka PLC" },
+            { symbol: "BERU.N0000", name: "Beruwala Resorts PLC" },
+            { symbol: "PALM.N0000", name: "Palm Garden Hotels PLC" },
+            { symbol: "CHOT.N0000", name: "Ceylon Hotels Corporation" },
+            { symbol: "SIGV.N0000", name: "Sigiriya Village Hotels" },
+            { symbol: "SERV.N0000", name: "Serendib Hotels PLC" },
+            { symbol: "CONN.N0000", name: "The Fortress Resorts PLC" },
+            { symbol: "MARA.N0000", name: "Marawila Resorts PLC" },
+            { symbol: "TAFR.N0000", name: "Tangerine Beach Hotels" },
+            { symbol: "RHTL.N0000", name: "Renuka Hotels PLC" },
+            { symbol: "CITR.N0000", name: "Citrus Leisure PLC" },
+
+            // Real Estate & Property
+            { symbol: "OSEA.N0000", name: "Overseas Realty (Ceylon) PLC" },
+            { symbol: "COLR.N0000", name: "Colombo Land and Development" },
+            { symbol: "EAST.N0000", name: "Eastern Merchants PLC" },
+            { symbol: "ONAL.N0000", name: "On'ally Holdings PLC" },
+            { symbol: "PDL.N0000", name: "Property Development PLC" },
+            { symbol: "CTBL.N0000", name: "Ceylon Tea Brokers PLC" }
+        ];
+
         let isRealInflationView = false;
         let editingIndex = null;
 
@@ -211,9 +343,9 @@
         };
 
         const defaultPortfolio = [
-            { symbol: "JKH.N0000", name: "John Keells Holdings", shares: 500, buy_price: 190.00, buy_date: "2023-05-10" },
-            { symbol: "COMB.N0000", name: "Commercial Bank", shares: 1000, buy_price: 55.00, buy_date: "2022-11-20" },
-            { symbol: "SAMP.N0000", name: "Sampath Bank", shares: 800, buy_price: 110.00, buy_date: "2024-01-15" }
+            { symbol: "JKH.N0000", name: "John Keells Holdings PLC", shares: 500, buy_price: 190.00, buy_date: "2023-05-10" },
+            { symbol: "COMB.N0000", name: "Commercial Bank of Ceylon (Voting)", shares: 1000, buy_price: 55.00, buy_date: "2022-11-20" },
+            { symbol: "SAMP.N0000", name: "Sampath Bank PLC", shares: 800, buy_price: 110.00, buy_date: "2024-01-15" }
         ];
 
         function getPortfolio() {
@@ -279,6 +411,46 @@
             refreshPrices();
         }
 
+        function filterTickers() {
+            const query = document.getElementById('ticker-search').value.toLowerCase().trim();
+            const resultsBox = document.getElementById('ticker-results');
+
+            if (!query) {
+                resultsBox.classList.add('hidden');
+                return;
+            }
+
+            const matched = CSE_ALL_TICKERS.filter(t => 
+                t.symbol.toLowerCase().includes(query) || 
+                t.name.toLowerCase().includes(query)
+            ).slice(0, 8); // Top 8 matches
+
+            if (matched.length === 0) {
+                resultsBox.innerHTML = `<div class="p-3 text-xs text-slate-500">No matching stock found. Enter custom ticker below.</div>`;
+                resultsBox.classList.remove('hidden');
+                return;
+            }
+
+            resultsBox.innerHTML = matched.map(t => `
+                <div onclick="selectStock('${t.symbol}', '${t.name.replace(/'/g, "\\'")}')" class="p-2.5 hover:bg-slate-800 cursor-pointer flex justify-between items-center text-xs">
+                    <div>
+                        <span class="font-bold text-emerald-400">${t.symbol}</span>
+                        <div class="text-slate-400">${t.name}</div>
+                    </div>
+                    <span class="text-slate-500 text-[10px]">Select ↵</span>
+                </div>
+            `).join('');
+
+            resultsBox.classList.remove('hidden');
+        }
+
+        function selectStock(symbol, name) {
+            document.getElementById('symbol').value = symbol;
+            document.getElementById('name').value = name;
+            document.getElementById('ticker-search').value = `${symbol} - ${name}`;
+            document.getElementById('ticker-results').classList.add('hidden');
+        }
+
         function evaluateRules(roi, shares, price, feeRate) {
             if (roi >= 300) {
                 return { signal: "SELL 100%", color: "rose", rule: "Rule 10", action: `Sell all ${shares} shares (~LKR ${(shares*price*(1-feeRate)).toLocaleString()})` };
@@ -334,18 +506,14 @@
                 let currentPrice = await fetchStockPrice(item.symbol);
                 if (!currentPrice) currentPrice = item.buy_price;
 
-                // Holding period calculation (years)
                 const buyDate = item.buy_date ? new Date(item.buy_date) : now;
                 const diffTime = Math.max(0, now - buyDate);
                 const yearsHeld = diffTime / (1000 * 60 * 60 * 24 * 365.25);
 
                 const nominalCost = (item.shares * item.buy_price) * (1 + feeRate);
                 const nominalValue = (item.shares * currentPrice) * (1 - feeRate);
-
-                // Inflation-adjusted cost in today's purchasing power
                 const realCost = nominalCost * Math.pow(1 + inflationRate, yearsHeld);
 
-                // Use Real or Nominal cost based on toggle
                 const activeCost = isRealInflationView ? realCost : nominalCost;
                 const pnl = nominalValue - activeCost;
                 const roi = (pnl / activeCost) * 100;
@@ -406,60 +574,25 @@
             document.getElementById('status-indicator').innerText = `Updated at ${new Date().toLocaleTimeString()}`;
         }
 
-        function onTickerChange() {
-            const select = document.getElementById('ticker-select');
-            const customBox = document.getElementById('custom-ticker-box');
-            const nameInput = document.getElementById('name');
-            const selectedOpt = select.options[select.selectedIndex];
-
-            if (select.value === "CUSTOM") {
-                customBox.classList.remove('hidden');
-                nameInput.value = '';
-            } else if (select.value) {
-                customBox.classList.add('hidden');
-                nameInput.value = selectedOpt.getAttribute('data-name') || '';
-            } else {
-                customBox.classList.add('hidden');
-                nameInput.value = '';
-            }
-        }
-
         function openModal(index = null) {
             editingIndex = index;
             const modal = document.getElementById('stockModal');
             const title = document.getElementById('modal-title');
-            const select = document.getElementById('ticker-select');
-            const customBox = document.getElementById('custom-ticker-box');
+            document.getElementById('ticker-results').classList.add('hidden');
 
             if (index !== null) {
                 title.innerText = "Edit Stock Holding";
                 const item = getPortfolio()[index];
-                
-                let found = false;
-                for (let i = 0; i < select.options.length; i++) {
-                    if (select.options[i].value === item.symbol) {
-                        select.selectedIndex = i;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    select.value = "CUSTOM";
-                    customBox.classList.remove('hidden');
-                    document.getElementById('custom_symbol').value = item.symbol;
-                } else {
-                    customBox.classList.add('hidden');
-                }
-
+                document.getElementById('ticker-search').value = `${item.symbol} - ${item.name}`;
+                document.getElementById('symbol').value = item.symbol;
                 document.getElementById('name').value = item.name;
                 document.getElementById('shares').value = item.shares;
                 document.getElementById('buy_price').value = item.buy_price;
                 document.getElementById('buy_date').value = item.buy_date || new Date().toISOString().split('T')[0];
             } else {
                 title.innerText = "Add CSE Stock Position";
-                select.value = "";
-                customBox.classList.add('hidden');
-                document.getElementById('custom_symbol').value = '';
+                document.getElementById('ticker-search').value = '';
+                document.getElementById('symbol').value = '';
                 document.getElementById('name').value = '';
                 document.getElementById('shares').value = '';
                 document.getElementById('buy_price').value = '';
@@ -478,20 +611,14 @@
         }
 
         function saveStock() {
-            const select = document.getElementById('ticker-select');
-            let symbol = select.value;
-
-            if (symbol === "CUSTOM" || !symbol) {
-                symbol = document.getElementById('custom_symbol').value.trim().toUpperCase();
-            }
-
+            let symbol = document.getElementById('symbol').value.trim().toUpperCase();
             const name = document.getElementById('name').value.trim() || symbol;
             const shares = parseInt(document.getElementById('shares').value);
             const buy_price = parseFloat(document.getElementById('buy_price').value);
             const buy_date = document.getElementById('buy_date').value;
 
             if (!symbol || isNaN(shares) || isNaN(buy_price)) {
-                alert("Please fill all fields properly");
+                alert("Please select a stock and enter shares & price correctly.");
                 return;
             }
 
@@ -517,6 +644,15 @@
                 refreshPrices();
             }
         }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const searchBox = document.getElementById('ticker-search');
+            const resultsBox = document.getElementById('ticker-results');
+            if (e.target !== searchBox && resultsBox && !resultsBox.contains(e.target)) {
+                resultsBox.classList.add('hidden');
+            }
+        });
 
         // Initialize Settings & App
         loadSettingsUI();
