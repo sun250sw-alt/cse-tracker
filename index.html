@@ -49,7 +49,7 @@
         <div class="bg-slate-900/80 rounded-xl border border-slate-800 p-6 overflow-x-auto shadow-xl">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-bold text-slate-200">Active Positions & Automated Signals</h2>
-                <span class="text-xs text-slate-400">Rules evaluate automatically against current market price</span>
+                <span class="text-xs text-slate-400">Rules evaluate automatically against latest market price</span>
             </div>
 
             <table class="w-full text-left text-sm">
@@ -62,7 +62,7 @@
                         <th class="py-3 px-3">ROI (%)</th>
                         <th class="py-3 px-3">Iron Rule Signal</th>
                         <th class="py-3 px-3">Action Details</th>
-                        <th class="py-3 px-3 text-right">Action</th>
+                        <th class="py-3 px-3 text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="holdings-body" class="divide-y divide-slate-800/60">
@@ -87,37 +87,87 @@
         </div>
     </div>
 
-    <!-- Modal for Adding Stock -->
-    <div id="addModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <!-- Modal for Adding / Editing Stock -->
+    <div id="stockModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div class="bg-slate-900 border border-slate-700 p-6 rounded-xl w-full max-w-md shadow-2xl">
-            <h2 class="text-xl font-bold mb-4 text-white">Add CSE Stock Position</h2>
-            <div class="space-y-3">
+            <h2 id="modal-title" class="text-xl font-bold mb-4 text-white">Add CSE Stock Position</h2>
+            <div class="space-y-4">
                 <div>
-                    <label class="text-xs text-slate-400">CSE Ticker Symbol (e.g. JKH.N0000)</label>
-                    <input id="symbol" type="text" placeholder="JKH.N0000" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
+                    <label class="text-xs text-slate-400">Select CSE Stock</label>
+                    <select id="ticker-select" onchange="onTickerChange()" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 text-slate-200 focus:border-emerald-500 outline-none">
+                        <option value="">-- Select or Choose Custom --</option>
+                        <optgroup label="Banking & Finance">
+                            <option value="COMB.N0000" data-name="Commercial Bank">COMB - Commercial Bank</option>
+                            <option value="SAMP.N0000" data-name="Sampath Bank">SAMP - Sampath Bank</option>
+                            <option value="HNB.N0000" data-name="Hatton National Bank">HNB - Hatton National Bank</option>
+                            <option value="NTB.N0000" data-name="Nations Trust Bank">NTB - Nations Trust Bank</option>
+                            <option value="SEYB.N0000" data-name="Seylan Bank">SEYB - Seylan Bank</option>
+                            <option value="DFCC.N0000" data-name="DFCC Bank">DFCC - DFCC Bank</option>
+                            <option value="PABC.N0000" data-name="Pan Asia Banking">PABC - Pan Asia Bank</option>
+                            <option value="LOLC.N0000" data-name="LOLC Holdings">LOLC - LOLC Holdings</option>
+                        </optgroup>
+                        <optgroup label="Conglomerates & Diversified">
+                            <option value="JKH.N0000" data-name="John Keells Holdings">JKH - John Keells Holdings</option>
+                            <option value="HAYL.N0000" data-name="Hayleys PLC">HAYL - Hayleys PLC</option>
+                            <option value="BIL.N0000" data-name="Browns Investments">BIL - Browns Investments</option>
+                            <option value="MELS.N0000" data-name="Melstacorp">MELS - Melstacorp</option>
+                            <option value="HHL.N0000" data-name="Hemas Holdings">HHL - Hemas Holdings</option>
+                            <option value="VONE.N0000" data-name="Vallibel One">VONE - Vallibel One</option>
+                            <option value="SPEN.N0000" data-name="Aitken Spence">SPEN - Aitken Spence</option>
+                            <option value="RICH.N0000" data-name="Richard Pieris">RICH - Richard Pieris</option>
+                        </optgroup>
+                        <optgroup label="Energy & Materials">
+                            <option value="LIOC.N0000" data-name="Lanka IOC">LIOC - Lanka IOC</option>
+                            <option value="WIND.N0000" data-name="WindForce PLC">WIND - WindForce PLC</option>
+                            <option value="LGL.N0000" data-name="Laughfs Gas">LGL - Laughfs Gas</option>
+                            <option value="TKYO.N0000" data-name="Tokyo Cement">TKYO - Tokyo Cement</option>
+                            <option value="RCL.N0000" data-name="Royal Ceramics">RCL - Royal Ceramics</option>
+                            <option value="DIPD.N0000" data-name="Dipped Products">DIPD - Dipped Products</option>
+                        </optgroup>
+                        <optgroup label="Telecom & Consumer">
+                            <option value="DIAL.N0000" data-name="Dialog Axiata">DIAL - Dialog Axiata</option>
+                            <option value="SLTL.N0000" data-name="Sri Lanka Telecom">SLTL - Sri Lanka Telecom</option>
+                            <option value="CTC.N0000" data-name="Ceylon Tobacco">CTC - Ceylon Tobacco</option>
+                            <option value="LION.N0000" data-name="Lion Brewery">LION - Lion Brewery</option>
+                            <option value="NEST.N0000" data-name="Nestle Lanka">NEST - Nestle Lanka</option>
+                            <option value="CARG.N0000" data-name="Cargills Ceylon">CARG - Cargills Ceylon</option>
+                        </optgroup>
+                        <option value="CUSTOM">-- Custom / Other Ticker --</option>
+                    </select>
                 </div>
+
+                <div id="custom-ticker-box" class="hidden">
+                    <label class="text-xs text-slate-400">Custom Symbol (e.g. EXPO.N0000)</label>
+                    <input id="custom_symbol" type="text" placeholder="EXPO.N0000" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
+                </div>
+
                 <div>
                     <label class="text-xs text-slate-400">Company Name</label>
-                    <input id="name" type="text" placeholder="John Keells Holdings" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
+                    <input id="name" type="text" placeholder="Company Name" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
                 </div>
+
                 <div>
-                    <label class="text-xs text-slate-400">Total Shares Owned</label>
+                    <label class="text-xs text-slate-400">Number of Shares</label>
                     <input id="shares" type="number" placeholder="500" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
                 </div>
+
                 <div>
                     <label class="text-xs text-slate-400">Average Buy Price (LKR)</label>
                     <input id="buy_price" type="number" step="0.01" placeholder="195.00" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
                 </div>
             </div>
+
             <div class="flex justify-end gap-3 mt-6">
                 <button onclick="closeModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded text-sm font-medium">Cancel</button>
-                <button onclick="addStock()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded text-sm font-bold text-white shadow-lg">Save Position</button>
+                <button onclick="saveStock()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded text-sm font-bold text-white shadow-lg">Save Position</button>
             </div>
         </div>
     </div>
 
     <script>
-        const CSE_FEE = 0.0112; // 1.12% fee
+        const CSE_FEE = 0.0112; // 1.12%
+        let editingIndex = null;
+
         const colorClasses = {
             emerald: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30",
             amber: "bg-amber-500/10 text-amber-400 border border-amber-500/30",
@@ -169,7 +219,6 @@
             const sym = ticker.toUpperCase().endsWith('.CM') ? ticker : `${ticker}.CM`;
             const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=5d`;
             try {
-                // Using open CORS bridge
                 const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
                 const data = await res.json();
                 const parsed = JSON.parse(data.contents);
@@ -210,8 +259,8 @@
                         <div class="text-white font-semibold">${item.symbol}</div>
                         <div class="text-xs text-slate-500">${item.name}</div>
                     </td>
-                    <td class="py-3.5 px-3 font-mono">${item.shares.toLocaleString()}</td>
-                    <td class="py-3.5 px-3 font-mono">${item.buy_price.toFixed(2)}</td>
+                    <td class="py-3.5 px-3 font-mono text-slate-300">${item.shares.toLocaleString()}</td>
+                    <td class="py-3.5 px-3 font-mono text-slate-300">${item.buy_price.toFixed(2)}</td>
                     <td class="py-3.5 px-3 text-white font-bold font-mono">${currentPrice.toFixed(2)}</td>
                     <td class="py-3.5 px-3 font-bold ${roi >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-mono">
                         ${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%
@@ -225,7 +274,8 @@
                         <div>${advice.action}</div>
                         <div class="text-[10px] text-slate-500">${advice.rule}</div>
                     </td>
-                    <td class="py-3.5 px-3 text-right">
+                    <td class="py-3.5 px-3 text-right whitespace-nowrap">
+                        <button onclick="editStock(${i})" class="text-amber-400 hover:text-amber-300 text-xs font-semibold mr-3">Edit</button>
                         <button onclick="deleteStock(${i})" class="text-slate-500 hover:text-rose-400 text-xs font-semibold">Delete</button>
                     </td>
                 `;
@@ -249,11 +299,84 @@
             document.getElementById('status-indicator').innerText = `Updated at ${new Date().toLocaleTimeString()}`;
         }
 
-        function openModal() { document.getElementById('addModal').classList.remove('hidden'); }
-        function closeModal() { document.getElementById('addModal').classList.add('hidden'); }
+        function onTickerChange() {
+            const select = document.getElementById('ticker-select');
+            const customBox = document.getElementById('custom-ticker-box');
+            const nameInput = document.getElementById('name');
+            const selectedOpt = select.options[select.selectedIndex];
 
-        function addStock() {
-            const symbol = document.getElementById('symbol').value.trim().toUpperCase();
+            if (select.value === "CUSTOM") {
+                customBox.classList.remove('hidden');
+                nameInput.value = '';
+            } else if (select.value) {
+                customBox.classList.add('hidden');
+                nameInput.value = selectedOpt.getAttribute('data-name') || '';
+            } else {
+                customBox.classList.add('hidden');
+                nameInput.value = '';
+            }
+        }
+
+        function openModal(index = null) {
+            editingIndex = index;
+            const modal = document.getElementById('stockModal');
+            const title = document.getElementById('modal-title');
+            const select = document.getElementById('ticker-select');
+            const customBox = document.getElementById('custom-ticker-box');
+
+            if (index !== null) {
+                title.innerText = "Edit Stock Holding";
+                const item = getPortfolio()[index];
+                
+                // Match with dropdown or set as custom
+                let found = false;
+                for (let i = 0; i < select.options.length; i++) {
+                    if (select.options[i].value === item.symbol) {
+                        select.selectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    select.value = "CUSTOM";
+                    customBox.classList.remove('hidden');
+                    document.getElementById('custom_symbol').value = item.symbol;
+                } else {
+                    customBox.classList.add('hidden');
+                }
+
+                document.getElementById('name').value = item.name;
+                document.getElementById('shares').value = item.shares;
+                document.getElementById('buy_price').value = item.buy_price;
+            } else {
+                title.innerText = "Add CSE Stock Position";
+                select.value = "";
+                customBox.classList.add('hidden');
+                document.getElementById('custom_symbol').value = '';
+                document.getElementById('name').value = '';
+                document.getElementById('shares').value = '';
+                document.getElementById('buy_price').value = '';
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('stockModal').classList.add('hidden');
+            editingIndex = null;
+        }
+
+        function editStock(index) {
+            openModal(index);
+        }
+
+        function saveStock() {
+            const select = document.getElementById('ticker-select');
+            let symbol = select.value;
+
+            if (symbol === "CUSTOM" || !symbol) {
+                symbol = document.getElementById('custom_symbol').value.trim().toUpperCase();
+            }
+
             const name = document.getElementById('name').value.trim() || symbol;
             const shares = parseInt(document.getElementById('shares').value);
             const buy_price = parseFloat(document.getElementById('buy_price').value);
@@ -264,7 +387,12 @@
             }
 
             const list = getPortfolio();
-            list.push({ symbol, name, shares, buy_price });
+            if (editingIndex !== null) {
+                list[editingIndex] = { symbol, name, shares, buy_price };
+            } else {
+                list.push({ symbol, name, shares, buy_price });
+            }
+
             savePortfolio(list);
             closeModal();
             refreshPrices();
