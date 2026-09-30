@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSE Iron Rules & Performance Dashboard</title>
+    <title>CSE Iron Rules & Live Portfolio Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -16,7 +16,7 @@
             <div>
                 <div class="flex items-center gap-2">
                     <span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold rounded-full">Automated Strategy Engine</span>
-                    <span id="status-indicator" class="text-xs text-slate-500">~15m Delayed Data</span>
+                    <span id="status-indicator" class="text-xs text-slate-500">Checking CSE Live Feeds...</span>
                 </div>
                 <h1 class="text-3xl font-black tracking-tight text-white mt-2">CSE Performance & Iron Rules Dashboard</h1>
             </div>
@@ -73,22 +73,20 @@
             </div>
         </div>
 
-        <!-- Interactive Performance Charts Section -->
+        <!-- Performance Charts Section -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 my-6">
-            <!-- Cost vs Current Value Performance Chart -->
+            <!-- Cost vs Current Value Chart -->
             <div class="lg:col-span-2 bg-slate-900/80 p-5 rounded-xl border border-slate-800 shadow-xl flex flex-col justify-between">
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <h3 class="text-base font-bold text-slate-200">Holdings Performance (Cost vs Market Value)</h3>
-                        <p class="text-xs text-slate-400">Compare what you invested against current portfolio value</p>
-                    </div>
+                <div class="mb-4">
+                    <h3 class="text-base font-bold text-slate-200">Holdings Performance (Cost vs Market Value)</h3>
+                    <p class="text-xs text-slate-400">Compare invested capital against current market worth</p>
                 </div>
                 <div class="w-full h-64">
                     <canvas id="performanceChart"></canvas>
                 </div>
             </div>
 
-            <!-- Asset Allocation Doughnut Chart -->
+            <!-- Asset Allocation Doughnut -->
             <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 shadow-xl flex flex-col items-center justify-between">
                 <div class="w-full mb-2">
                     <h3 class="text-base font-bold text-slate-200">Portfolio Allocation</h3>
@@ -104,7 +102,10 @@
         <div class="bg-slate-900/80 rounded-xl border border-slate-800 p-6 overflow-x-auto shadow-xl">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-bold text-slate-200">Active Positions & Iron Rule Signals</h2>
-                <span class="text-xs text-slate-400">Real values compound inflation from your exact Buy Date</span>
+                <div class="flex items-center gap-3 text-xs text-slate-400">
+                    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> Live Price</span>
+                    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> Fallback</span>
+                </div>
             </div>
 
             <table class="w-full text-left text-sm">
@@ -113,7 +114,7 @@
                         <th class="py-3 px-3">Ticker & Date</th>
                         <th class="py-3 px-3">Qty</th>
                         <th class="py-3 px-3">Avg Buy</th>
-                        <th class="py-3 px-3">Current Price</th>
+                        <th class="py-3 px-3">Live Price</th>
                         <th id="th-cost" class="py-3 px-3">Invested Cost</th>
                         <th id="th-roi" class="py-3 px-3">ROI (%)</th>
                         <th class="py-3 px-3">Iron Rule Signal</th>
@@ -122,12 +123,12 @@
                     </tr>
                 </thead>
                 <tbody id="holdings-body" class="divide-y divide-slate-800/60">
-                    <!-- Dynamic Rows -->
+                    <!-- Loaded dynamically -->
                 </tbody>
             </table>
         </div>
 
-        <!-- Strategy Reference Footer -->
+        <!-- Strategy Rules Reference Footer -->
         <div class="mt-8 p-5 bg-slate-900/40 rounded-xl border border-slate-800/80">
             <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Active Iron Rules Reference:</h4>
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2 text-xs text-slate-400">
@@ -152,22 +153,21 @@
                 <!-- Searchable Stock Autocomplete -->
                 <div class="relative">
                     <label class="text-xs text-slate-400">Search CSE Listed Stock (Ticker or Name)</label>
-                    <input id="ticker-search" type="text" oninput="filterTickers()" placeholder="e.g. JKH, Commercial Bank, LIOC..." class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 text-slate-200 focus:border-emerald-500 outline-none">
+                    <input id="ticker-search" type="text" oninput="filterTickers()" placeholder="e.g. SAMP, COMB, JKH, LIOC, Ceylon..." class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 text-slate-200 focus:border-emerald-500 outline-none">
                     
                     <!-- Search Results Dropdown -->
                     <div id="ticker-results" class="hidden absolute left-0 right-0 top-full mt-1 max-h-48 overflow-y-auto bg-slate-900 border border-slate-700 rounded-lg shadow-2xl z-50 divide-y divide-slate-800">
-                        <!-- Filtered list injected here -->
                     </div>
                 </div>
 
                 <div>
                     <label class="text-xs text-slate-400">Ticker Symbol</label>
-                    <input id="symbol" type="text" placeholder="JKH.N0000" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none uppercase font-mono">
+                    <input id="symbol" type="text" placeholder="SAMP.N0000" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none uppercase font-mono">
                 </div>
 
                 <div>
                     <label class="text-xs text-slate-400">Company Name</label>
-                    <input id="name" type="text" placeholder="John Keells Holdings PLC" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
+                    <input id="name" type="text" placeholder="Sampath Bank PLC" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
@@ -177,13 +177,13 @@
                     </div>
                     <div>
                         <label class="text-xs text-slate-400">Number of Shares</label>
-                        <input id="shares" type="number" placeholder="500" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
+                        <input id="shares" type="number" placeholder="800" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
                     </div>
                 </div>
 
                 <div>
                     <label class="text-xs text-slate-400">Average Buy Price (LKR)</label>
-                    <input id="buy_price" type="number" step="0.01" placeholder="195.00" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
+                    <input id="buy_price" type="number" step="0.01" placeholder="110.00" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
                 </div>
             </div>
 
@@ -197,9 +197,10 @@
     <script>
         // Comprehensive CSE Ticker Database
         const CSE_ALL_TICKERS = [
+            // Banking & Finance
+            { symbol: "SAMP.N0000", name: "Sampath Bank PLC" },
             { symbol: "COMB.N0000", name: "Commercial Bank of Ceylon (Voting)" },
             { symbol: "COMB.X0000", name: "Commercial Bank of Ceylon (Non-Voting)" },
-            { symbol: "SAMP.N0000", name: "Sampath Bank PLC" },
             { symbol: "HNB.N0000", name: "Hatton National Bank (Voting)" },
             { symbol: "HNB.X0000", name: "Hatton National Bank (Non-Voting)" },
             { symbol: "NTB.N0000", name: "Nations Trust Bank PLC" },
@@ -208,6 +209,8 @@
             { symbol: "DFCC.N0000", name: "DFCC Bank PLC" },
             { symbol: "PABC.N0000", name: "Pan Asia Banking Corporation" },
             { symbol: "NDB.N0000", name: "National Development Bank PLC" },
+            { symbol: "UBC.N0000", name: "Union Bank of Colombo" },
+            { symbol: "SDB.N0000", name: "SANASA Development Bank (Sanasa)" },
             { symbol: "LOLC.N0000", name: "LOLC Holdings PLC" },
             { symbol: "LOFC.N0000", name: "LOLC Finance PLC" },
             { symbol: "CDB.N0000", name: "Citizens Development Business Finance" },
@@ -219,6 +222,8 @@
             { symbol: "AAIC.N0000", name: "Softlogic Life Insurance" },
             { symbol: "JINS.N0000", name: "Janashakthi Insurance PLC" },
             { symbol: "CINS.N0000", name: "Ceylinco Insurance PLC" },
+            
+            // Conglomerates & Diversified
             { symbol: "JKH.N0000", name: "John Keells Holdings PLC" },
             { symbol: "HAYL.N0000", name: "Hayleys PLC" },
             { symbol: "BIL.N0000", name: "Browns Investments PLC" },
@@ -228,7 +233,11 @@
             { symbol: "SPEN.N0000", name: "Aitken Spence PLC" },
             { symbol: "RICH.N0000", name: "Richard Pieris and Company" },
             { symbol: "EXPO.N0000", name: "Expolanka Holdings PLC" },
+            { symbol: "SUN.N0000", name: "Sunshine Holdings PLC" },
+
+            // Energy, Manufacturing, Cables & Cement
             { symbol: "LIOC.N0000", name: "Lanka IOC PLC" },
+            { symbol: "LLUB.N0000", name: "Chevron Lubricants Lanka PLC" },
             { symbol: "WIND.N0000", name: "WindForce PLC" },
             { symbol: "LGL.N0000", name: "LAUGFS Gas PLC" },
             { symbol: "RCL.N0000", name: "Royal Ceramics Lanka PLC" },
@@ -237,7 +246,9 @@
             { symbol: "AEL.N0000", name: "Access Engineering PLC" },
             { symbol: "DIPD.N0000", name: "Dipped Products PLC" },
             { symbol: "TJL.N0000", name: "Teejay Lanka PLC" },
-            { symbol: "LLUB.N0000", name: "Chevron Lubricants Lanka" },
+            { symbol: "GLAS.N0000", name: "PGP Glass Ceylon PLC" },
+
+            // Food, Beverage, Tobacco & Plantations
             { symbol: "CTC.N0000", name: "Ceylon Tobacco Company PLC" },
             { symbol: "DIST.N0000", name: "Distilleries Company of Sri Lanka" },
             { symbol: "LION.N0000", name: "Lion Brewery Ceylon PLC" },
@@ -245,11 +256,19 @@
             { symbol: "NEST.N0000", name: "Nestle Lanka PLC" },
             { symbol: "CCS.N0000", name: "Ceylon Cold Stores PLC" },
             { symbol: "WATA.N0000", name: "Watawala Plantations PLC" },
-            { symbol: "DIAL.N0000", name: "Dialog Axiata PLC" },
-            { symbol: "SLTL.N0000", name: "Sri Lanka Telecom PLC" },
+            { symbol: "BFL.N0000", name: "Bairaha Farms PLC" },
+            { symbol: "GRAN.N0000", name: "Ceylon Grain Elevators PLC" },
+
+            // Healthcare & Hospitals
+            { symbol: "SINH.N0000", name: "Singhe Hospitals PLC" },
             { symbol: "ASIR.N0000", name: "Asiri Hospital Holdings PLC" },
             { symbol: "CHL.N0000", name: "Ceylon Hospitals PLC (Durdans)" },
             { symbol: "LHCL.N0000", name: "Lanka Hospitals Corporation" },
+            { symbol: "NHL.N0000", name: "Nawaloka Hospitals PLC" },
+
+            // Telecom, Retail & Tourism
+            { symbol: "DIAL.N0000", name: "Dialog Axiata PLC" },
+            { symbol: "SLTL.N0000", name: "Sri Lanka Telecom PLC" },
             { symbol: "ODEL.N0000", name: "ODEL PLC" },
             { symbol: "SINS.N0000", name: "Singer (Sri Lanka) PLC" },
             { symbol: "AHUN.N0000", name: "Aitken Spence Hotel Holdings" },
@@ -270,9 +289,9 @@
         };
 
         const defaultPortfolio = [
-            { symbol: "JKH.N0000", name: "John Keells Holdings PLC", shares: 500, buy_price: 190.00, buy_date: "2023-05-10" },
-            { symbol: "COMB.N0000", name: "Commercial Bank of Ceylon", shares: 1000, buy_price: 55.00, buy_date: "2022-11-20" },
-            { symbol: "SAMP.N0000", name: "Sampath Bank PLC", shares: 800, buy_price: 110.00, buy_date: "2024-01-15" }
+            { symbol: "SAMP.N0000", name: "Sampath Bank PLC", shares: 800, buy_price: 110.00, buy_date: "2024-01-15" },
+            { symbol: "COMB.N0000", name: "Commercial Bank of Ceylon", shares: 1000, buy_price: 195.00, buy_date: "2023-11-20" },
+            { symbol: "JKH.N0000", name: "John Keells Holdings PLC", shares: 500, buy_price: 18.00, buy_date: "2023-05-10" }
         ];
 
         function getPortfolio() {
@@ -353,7 +372,7 @@
             ).slice(0, 8);
 
             if (matched.length === 0) {
-                resultsBox.innerHTML = `<div class="p-3 text-xs text-slate-500">No stock found. Type symbol below.</div>`;
+                resultsBox.innerHTML = `<div class="p-3 text-xs text-slate-500">No stock found. Type symbol directly below.</div>`;
                 resultsBox.classList.remove('hidden');
                 return;
             }
@@ -403,23 +422,63 @@
             return { signal: "HOLD", color: "blue", rule: "Rules 1, 4, 5", action: "Keep holding position" };
         }
 
+        // Bulletproof Multi-Proxy Live Price Fetcher
         async function fetchStockPrice(ticker) {
-            const sym = ticker.toUpperCase().endsWith('.CM') ? ticker : `${ticker}.CM`;
-            const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=5d`;
-            try {
-                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-                const data = await res.json();
-                const parsed = JSON.parse(data.contents);
-                const closePrices = parsed.chart.result[0].indicators.quote[0].close;
-                const cleanCloses = closePrices.filter(p => p !== null);
-                return cleanCloses[cleanCloses.length - 1];
-            } catch (e) {
-                return null;
+            const cleanSym = ticker.toUpperCase().replace(/\.CM$/, '').replace(/\.LK$/, '');
+            const symbolsToTry = [`${cleanSym}.CM`, `${cleanSym}.LK`];
+
+            for (const sym of symbolsToTry) {
+                const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=5d`;
+
+                const proxyUrls = [
+                    `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`,
+                    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`,
+                    `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`
+                ];
+
+                for (const proxy of proxyUrls) {
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+                        const res = await fetch(proxy, { signal: controller.signal });
+                        clearTimeout(timeoutId);
+
+                        if (!res.ok) continue;
+
+                        let json;
+                        if (proxy.includes('allorigins')) {
+                            const wrapper = await res.json();
+                            json = JSON.parse(wrapper.contents);
+                        } else {
+                            json = await res.json();
+                        }
+
+                        if (json && json.chart && json.chart.result && json.chart.result[0]) {
+                            const meta = json.chart.result[0].meta;
+                            const quotes = json.chart.result[0].indicators.quote[0];
+                            
+                            if (meta && meta.regularMarketPrice && meta.regularMarketPrice > 0) {
+                                return { price: meta.regularMarketPrice, isLive: true };
+                            }
+
+                            if (quotes && quotes.close) {
+                                const validCloses = quotes.close.filter(p => p !== null && !isNaN(p));
+                                if (validCloses.length > 0) {
+                                    return { price: validCloses[validCloses.length - 1], isLive: true };
+                                }
+                            }
+                        }
+                    } catch (err) {
+                        // Try next proxy
+                    }
+                }
             }
+
+            return { price: null, isLive: false };
         }
 
         function updateCharts(labels, costs, values) {
-            // 1. Performance Bar Chart (Cost vs Value)
             const ctxBar = document.getElementById('performanceChart').getContext('2d');
             if (perfChartInstance) perfChartInstance.destroy();
 
@@ -455,7 +514,6 @@
                 }
             });
 
-            // 2. Allocation Doughnut Chart
             const ctxPie = document.getElementById('allocationChart').getContext('2d');
             if (allocChartInstance) allocChartInstance.destroy();
 
@@ -480,7 +538,7 @@
         }
 
         async function refreshPrices() {
-            document.getElementById('status-indicator').innerText = "Fetching latest quotes...";
+            document.getElementById('status-indicator').innerText = "Fetching live CSE quotes...";
             const portfolio = getPortfolio();
             const { feeRate, inflationRate } = getSettings();
             const tbody = document.getElementById('holdings-body');
@@ -495,8 +553,10 @@
 
             for (let i = 0; i < portfolio.length; i++) {
                 const item = portfolio[i];
-                let currentPrice = await fetchStockPrice(item.symbol);
-                if (!currentPrice) currentPrice = item.buy_price;
+                
+                const result = await fetchStockPrice(item.symbol);
+                const currentPrice = result.isLive ? result.price : item.buy_price;
+                const isLive = result.isLive;
 
                 const buyDate = item.buy_date ? new Date(item.buy_date) : now;
                 const diffTime = Math.max(0, now - buyDate);
@@ -528,7 +588,10 @@
                     </td>
                     <td class="py-3.5 px-3 font-mono text-slate-300">${item.shares.toLocaleString()}</td>
                     <td class="py-3.5 px-3 font-mono text-slate-300">${item.buy_price.toFixed(2)}</td>
-                    <td class="py-3.5 px-3 text-white font-bold font-mono">${currentPrice.toFixed(2)}</td>
+                    <td class="py-3.5 px-3 font-mono">
+                        <span class="text-white font-bold">${currentPrice.toFixed(2)}</span>
+                        <span class="inline-block w-2 h-2 rounded-full ml-1 ${isLive ? 'bg-emerald-400' : 'bg-amber-500'}" title="${isLive ? 'Live CSE Market Price' : 'Offline / Using Fallback'}"></span>
+                    </td>
                     <td class="py-3.5 px-3 font-mono text-slate-300">
                         <div>${activeCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
                         ${isRealInflationView ? `<div class="text-[10px] text-purple-400">Orig: ${nominalCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>` : ''}
@@ -567,9 +630,8 @@
             roiEl.innerText = `${totalRoi >= 0 ? '+' : ''}${totalRoi.toFixed(2)}%`;
             roiEl.className = `text-2xl font-bold mt-1 ${totalRoi >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
-            document.getElementById('status-indicator').innerText = `Updated at ${new Date().toLocaleTimeString()}`;
+            document.getElementById('status-indicator').innerText = `Synced at ${new Date().toLocaleTimeString()}`;
 
-            // Render Charts
             updateCharts(chartLabels, chartCosts, chartValues);
         }
 
