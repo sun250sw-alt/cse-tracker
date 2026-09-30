@@ -10,6 +10,7 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen">
 
     <div class="max-w-7xl mx-auto px-4 py-8">
+        
         <!-- Header -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-slate-800 gap-4">
             <div>
@@ -17,11 +18,38 @@
                     <span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold rounded-full">Automated Strategy Engine</span>
                     <span id="status-indicator" class="text-xs text-slate-500">~15m Delayed Data</span>
                 </div>
-                <h1 class="text-3xl font-black tracking-tight text-white mt-2">CSE Iron Rules Monitor</h1>
+                <h1 class="text-3xl font-black tracking-tight text-white mt-2">CSE Iron Rules & Real Value Monitor</h1>
             </div>
-            <div class="flex gap-3">
-                <button onclick="refreshPrices()" class="bg-slate-800 hover:bg-slate-700 text-sm px-4 py-2 rounded-lg border border-slate-700 font-medium">🔄 Refresh Prices</button>
-                <button onclick="openModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-lg shadow-emerald-900/30">+ Add Holding</button>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="toggleInflationView()" id="inflation-btn" class="bg-purple-900/40 hover:bg-purple-800/60 text-purple-300 text-sm font-semibold px-4 py-2 rounded-lg border border-purple-700/50 transition-all">
+                    🔥 View: Nominal
+                </button>
+                <button onclick="refreshPrices()" class="bg-slate-800 hover:bg-slate-700 text-sm px-4 py-2 rounded-lg border border-slate-700 font-medium">🔄 Refresh</button>
+                <button onclick="openModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-lg shadow-emerald-900/30">+ Add Stock</button>
+            </div>
+        </div>
+
+        <!-- Controls Bar: Broker Fee & Inflation Settings -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-4 p-4 bg-slate-900/50 rounded-xl border border-slate-800 text-xs text-slate-300">
+            <!-- Broker Fee Control -->
+            <div class="flex items-center justify-between bg-slate-950/60 p-3 rounded-lg border border-slate-800/80">
+                <div class="flex items-center gap-2">
+                    <input id="enable-fee" type="checkbox" checked onchange="saveSettings()" class="w-4 h-4 rounded text-emerald-600 bg-slate-900 border-slate-700">
+                    <label for="enable-fee" class="font-medium">CSE Broker Fee (%)</label>
+                </div>
+                <input id="broker-fee-rate" type="number" step="0.01" value="1.12" onchange="saveSettings()" class="w-16 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-center font-bold text-slate-100">
+            </div>
+
+            <!-- Inflation Rate Control -->
+            <div class="flex items-center justify-between bg-slate-950/60 p-3 rounded-lg border border-slate-800/80">
+                <label class="font-medium">Annual Inflation Rate (%)</label>
+                <input id="inflation-rate" type="number" step="0.1" value="4.5" onchange="saveSettings()" class="w-16 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-center font-bold text-purple-400">
+            </div>
+
+            <!-- Real vs Nominal Indicator Status -->
+            <div class="flex items-center justify-between bg-slate-950/60 p-3 rounded-lg border border-slate-800/80">
+                <span class="text-slate-400">P&L Calculation Mode:</span>
+                <span id="mode-badge" class="px-2.5 py-0.5 rounded font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">Nominal LKR</span>
             </div>
         </div>
 
@@ -32,34 +60,35 @@
                 <h3 id="total-val" class="text-2xl font-bold mt-1 text-slate-100">LKR 0.00</h3>
             </div>
             <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800">
-                <p class="text-xs text-slate-400 font-medium tracking-wide">INVESTED (INC. 1.12% FEE)</p>
+                <p id="cost-label" class="text-xs text-slate-400 font-medium tracking-wide">TOTAL INVESTED COST</p>
                 <h3 id="total-inv" class="text-2xl font-bold mt-1 text-slate-400">LKR 0.00</h3>
             </div>
             <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800">
-                <p class="text-xs text-slate-400 font-medium tracking-wide">TOTAL NET P&L</p>
+                <p id="pnl-label" class="text-xs text-slate-400 font-medium tracking-wide">NET PROFIT / LOSS</p>
                 <h3 id="total-pnl" class="text-2xl font-bold mt-1">LKR 0.00</h3>
             </div>
             <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800">
-                <p class="text-xs text-slate-400 font-medium tracking-wide">PORTFOLIO ROI</p>
+                <p id="roi-label" class="text-xs text-slate-400 font-medium tracking-wide">TOTAL RETURN (ROI)</p>
                 <h3 id="total-roi" class="text-2xl font-bold mt-1">0.00%</h3>
             </div>
         </div>
 
-        <!-- Holdings & Strategy Table -->
+        <!-- Holdings Table -->
         <div class="bg-slate-900/80 rounded-xl border border-slate-800 p-6 overflow-x-auto shadow-xl">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold text-slate-200">Active Positions & Automated Signals</h2>
-                <span class="text-xs text-slate-400">Rules evaluate automatically against latest market price</span>
+                <h2 class="text-lg font-bold text-slate-200">Active Positions & Iron Rule Signals</h2>
+                <span class="text-xs text-slate-400">Real values compound inflation from your exact Buy Date</span>
             </div>
 
             <table class="w-full text-left text-sm">
                 <thead class="text-xs uppercase text-slate-400 border-b border-slate-800 bg-slate-950/50">
                     <tr>
-                        <th class="py-3 px-3">Ticker</th>
+                        <th class="py-3 px-3">Ticker & Date</th>
                         <th class="py-3 px-3">Qty</th>
                         <th class="py-3 px-3">Avg Buy</th>
                         <th class="py-3 px-3">Current Price</th>
-                        <th class="py-3 px-3">ROI (%)</th>
+                        <th id="th-cost" class="py-3 px-3">Invested Cost</th>
+                        <th id="th-roi" class="py-3 px-3">ROI (%)</th>
                         <th class="py-3 px-3">Iron Rule Signal</th>
                         <th class="py-3 px-3">Action Details</th>
                         <th class="py-3 px-3 text-right">Actions</th>
@@ -146,9 +175,15 @@
                     <input id="name" type="text" placeholder="Company Name" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
                 </div>
 
-                <div>
-                    <label class="text-xs text-slate-400">Number of Shares</label>
-                    <input id="shares" type="number" placeholder="500" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-slate-400">Buy Date</label>
+                        <input id="buy_date" type="date" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none text-slate-200">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Number of Shares</label>
+                        <input id="shares" type="number" placeholder="500" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
+                    </div>
                 </div>
 
                 <div>
@@ -165,7 +200,7 @@
     </div>
 
     <script>
-        const CSE_FEE = 0.0112; // 1.12%
+        let isRealInflationView = false;
         let editingIndex = null;
 
         const colorClasses = {
@@ -176,9 +211,9 @@
         };
 
         const defaultPortfolio = [
-            { symbol: "JKH.N0000", name: "John Keells Holdings", shares: 500, buy_price: 190.00 },
-            { symbol: "COMB.N0000", name: "Commercial Bank", shares: 1000, buy_price: 55.00 },
-            { symbol: "SAMP.N0000", name: "Sampath Bank", shares: 800, buy_price: 110.00 }
+            { symbol: "JKH.N0000", name: "John Keells Holdings", shares: 500, buy_price: 190.00, buy_date: "2023-05-10" },
+            { symbol: "COMB.N0000", name: "Commercial Bank", shares: 1000, buy_price: 55.00, buy_date: "2022-11-20" },
+            { symbol: "SAMP.N0000", name: "Sampath Bank", shares: 800, buy_price: 110.00, buy_date: "2024-01-15" }
         ];
 
         function getPortfolio() {
@@ -190,27 +225,81 @@
             localStorage.setItem('cse_portfolio', JSON.stringify(data));
         }
 
-        function evaluateRules(roi, shares, price) {
+        function getSettings() {
+            const feeEnabled = localStorage.getItem('cse_fee_enabled') !== 'false';
+            const feeRate = parseFloat(localStorage.getItem('cse_fee_rate') || '1.12') / 100.0;
+            const inflationRate = parseFloat(localStorage.getItem('cse_inflation_rate') || '4.5') / 100.0;
+            return { feeEnabled, feeRate: feeEnabled ? feeRate : 0.0, inflationRate };
+        }
+
+        function saveSettings() {
+            const feeEnabled = document.getElementById('enable-fee').checked;
+            const feeRate = document.getElementById('broker-fee-rate').value;
+            const inflationRate = document.getElementById('inflation-rate').value;
+
+            localStorage.setItem('cse_fee_enabled', feeEnabled);
+            localStorage.setItem('cse_fee_rate', feeRate);
+            localStorage.setItem('cse_inflation_rate', inflationRate);
+
+            refreshPrices();
+        }
+
+        function loadSettingsUI() {
+            document.getElementById('enable-fee').checked = localStorage.getItem('cse_fee_enabled') !== 'false';
+            document.getElementById('broker-fee-rate').value = localStorage.getItem('cse_fee_rate') || '1.12';
+            document.getElementById('inflation-rate').value = localStorage.getItem('cse_inflation_rate') || '4.5';
+        }
+
+        function toggleInflationView() {
+            isRealInflationView = !isRealInflationView;
+            const btn = document.getElementById('inflation-btn');
+            const badge = document.getElementById('mode-badge');
+            
+            if (isRealInflationView) {
+                btn.innerText = "🔥 View: Real (Inflation-Adjusted)";
+                btn.className = "bg-purple-600 hover:bg-purple-500 text-white text-sm font-semibold px-4 py-2 rounded-lg border border-purple-400 shadow-lg shadow-purple-900/30 transition-all";
+                badge.innerText = "Real Inflation-Adjusted";
+                badge.className = "px-2.5 py-0.5 rounded font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30";
+                document.getElementById('cost-label').innerText = "REAL COST (INFLATION-ADJUSTED)";
+                document.getElementById('pnl-label').innerText = "REAL NET PROFIT / LOSS";
+                document.getElementById('roi-label').innerText = "REAL ROI (%)";
+                document.getElementById('th-cost').innerText = "Real Cost (LKR)";
+                document.getElementById('th-roi').innerText = "Real ROI (%)";
+            } else {
+                btn.innerText = "📈 View: Nominal";
+                btn.className = "bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold px-4 py-2 rounded-lg border border-slate-700 transition-all";
+                badge.innerText = "Nominal LKR";
+                badge.className = "px-2.5 py-0.5 rounded font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30";
+                document.getElementById('cost-label').innerText = "TOTAL INVESTED COST";
+                document.getElementById('pnl-label').innerText = "NET PROFIT / LOSS";
+                document.getElementById('roi-label').innerText = "TOTAL RETURN (ROI)";
+                document.getElementById('th-cost').innerText = "Invested Cost";
+                document.getElementById('th-roi').innerText = "ROI (%)";
+            }
+            refreshPrices();
+        }
+
+        function evaluateRules(roi, shares, price, feeRate) {
             if (roi >= 300) {
-                return { signal: "SELL 100%", color: "rose", rule: "Rule 10", action: `Sell all ${shares} shares (~LKR ${(shares*price*(1-CSE_FEE)).toLocaleString()})` };
+                return { signal: "SELL 100%", color: "rose", rule: "Rule 10", action: `Sell all ${shares} shares (~LKR ${(shares*price*(1-feeRate)).toLocaleString()})` };
             } else if (roi >= 200) {
                 const s = Math.ceil(shares * 0.70);
-                return { signal: "SELL 70%", color: "rose", rule: "Rule 9", action: `Sell ${s} shares (~LKR ${(s*price*(1-CSE_FEE)).toLocaleString()})` };
+                return { signal: "SELL 70%", color: "rose", rule: "Rule 9", action: `Sell ${s} shares (~LKR ${(s*price*(1-feeRate)).toLocaleString()})` };
             } else if (roi >= 120) {
                 const s = Math.ceil(shares * 0.50);
-                return { signal: "SELL 50%", color: "amber", rule: "Rule 8", action: `Sell ${s} shares (~LKR ${(s*price*(1-CSE_FEE)).toLocaleString()})` };
+                return { signal: "SELL 50%", color: "amber", rule: "Rule 8", action: `Sell ${s} shares (~LKR ${(s*price*(1-feeRate)).toLocaleString()})` };
             } else if (roi >= 80) {
                 const s = Math.ceil(shares * 0.30);
-                return { signal: "SELL 30%", color: "amber", rule: "Rule 7", action: `Sell ${s} shares (~LKR ${(s*price*(1-CSE_FEE)).toLocaleString()})` };
+                return { signal: "SELL 30%", color: "amber", rule: "Rule 7", action: `Sell ${s} shares (~LKR ${(s*price*(1-feeRate)).toLocaleString()})` };
             } else if (roi >= 50) {
                 const s = Math.ceil(shares * 0.20);
-                return { signal: "SELL 20%", color: "amber", rule: "Rule 6", action: `Sell ${s} shares (~LKR ${(s*price*(1-CSE_FEE)).toLocaleString()})` };
+                return { signal: "SELL 20%", color: "amber", rule: "Rule 6", action: `Sell ${s} shares (~LKR ${(s*price*(1-feeRate)).toLocaleString()})` };
             } else if (roi <= -40) {
                 const s = Math.ceil(shares * 0.50);
-                return { signal: "BUY +50%", color: "emerald", rule: "Rule 3", action: `Buy +${s} shares (~LKR ${(s*price*(1+CSE_FEE)).toLocaleString()})` };
+                return { signal: "BUY +50%", color: "emerald", rule: "Rule 3", action: `Buy +${s} shares (~LKR ${(s*price*(1+feeRate)).toLocaleString()})` };
             } else if (roi <= -20) {
                 const s = Math.ceil(shares * 0.15);
-                return { signal: "BUY +15%", color: "emerald", rule: "Rule 2", action: `Buy +${s} shares (~LKR ${(s*price*(1+CSE_FEE)).toLocaleString()})` };
+                return { signal: "BUY +15%", color: "emerald", rule: "Rule 2", action: `Buy +${s} shares (~LKR ${(s*price*(1+feeRate)).toLocaleString()})` };
             }
             return { signal: "HOLD", color: "blue", rule: "Rules 1, 4, 5", action: "Keep holding position" };
         }
@@ -233,35 +322,53 @@
         async function refreshPrices() {
             document.getElementById('status-indicator').innerText = "Fetching latest quotes...";
             const portfolio = getPortfolio();
+            const { feeRate, inflationRate } = getSettings();
             const tbody = document.getElementById('holdings-body');
             tbody.innerHTML = '';
 
             let totalInv = 0, totalVal = 0;
+            const now = new Date();
 
             for (let i = 0; i < portfolio.length; i++) {
                 const item = portfolio[i];
                 let currentPrice = await fetchStockPrice(item.symbol);
                 if (!currentPrice) currentPrice = item.buy_price;
 
-                const cost = (item.shares * item.buy_price) * (1 + CSE_FEE);
-                const value = (item.shares * currentPrice) * (1 - CSE_FEE);
-                const pnl = value - cost;
-                const roi = (pnl / cost) * 100;
-                const advice = evaluateRules(roi, item.shares, currentPrice);
+                // Holding period calculation (years)
+                const buyDate = item.buy_date ? new Date(item.buy_date) : now;
+                const diffTime = Math.max(0, now - buyDate);
+                const yearsHeld = diffTime / (1000 * 60 * 60 * 24 * 365.25);
 
-                totalInv += cost;
-                totalVal += value;
+                const nominalCost = (item.shares * item.buy_price) * (1 + feeRate);
+                const nominalValue = (item.shares * currentPrice) * (1 - feeRate);
+
+                // Inflation-adjusted cost in today's purchasing power
+                const realCost = nominalCost * Math.pow(1 + inflationRate, yearsHeld);
+
+                // Use Real or Nominal cost based on toggle
+                const activeCost = isRealInflationView ? realCost : nominalCost;
+                const pnl = nominalValue - activeCost;
+                const roi = (pnl / activeCost) * 100;
+                const advice = evaluateRules(roi, item.shares, currentPrice, feeRate);
+
+                totalInv += activeCost;
+                totalVal += nominalValue;
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-800/30 transition-colors";
                 tr.innerHTML = `
                     <td class="py-3.5 px-3 font-medium">
                         <div class="text-white font-semibold">${item.symbol}</div>
-                        <div class="text-xs text-slate-500">${item.name}</div>
+                        <div class="text-[11px] text-slate-400">${item.name}</div>
+                        <div class="text-[10px] text-slate-500 mt-0.5">📅 ${item.buy_date || 'N/A'} (${yearsHeld.toFixed(1)}y)</div>
                     </td>
                     <td class="py-3.5 px-3 font-mono text-slate-300">${item.shares.toLocaleString()}</td>
                     <td class="py-3.5 px-3 font-mono text-slate-300">${item.buy_price.toFixed(2)}</td>
                     <td class="py-3.5 px-3 text-white font-bold font-mono">${currentPrice.toFixed(2)}</td>
+                    <td class="py-3.5 px-3 font-mono text-slate-300">
+                        <div>${activeCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                        ${isRealInflationView ? `<div class="text-[10px] text-purple-400">Orig: ${nominalCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>` : ''}
+                    </td>
                     <td class="py-3.5 px-3 font-bold ${roi >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-mono">
                         ${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%
                     </td>
@@ -328,7 +435,6 @@
                 title.innerText = "Edit Stock Holding";
                 const item = getPortfolio()[index];
                 
-                // Match with dropdown or set as custom
                 let found = false;
                 for (let i = 0; i < select.options.length; i++) {
                     if (select.options[i].value === item.symbol) {
@@ -348,6 +454,7 @@
                 document.getElementById('name').value = item.name;
                 document.getElementById('shares').value = item.shares;
                 document.getElementById('buy_price').value = item.buy_price;
+                document.getElementById('buy_date').value = item.buy_date || new Date().toISOString().split('T')[0];
             } else {
                 title.innerText = "Add CSE Stock Position";
                 select.value = "";
@@ -356,6 +463,7 @@
                 document.getElementById('name').value = '';
                 document.getElementById('shares').value = '';
                 document.getElementById('buy_price').value = '';
+                document.getElementById('buy_date').value = new Date().toISOString().split('T')[0];
             }
             modal.classList.remove('hidden');
         }
@@ -380,6 +488,7 @@
             const name = document.getElementById('name').value.trim() || symbol;
             const shares = parseInt(document.getElementById('shares').value);
             const buy_price = parseFloat(document.getElementById('buy_price').value);
+            const buy_date = document.getElementById('buy_date').value;
 
             if (!symbol || isNaN(shares) || isNaN(buy_price)) {
                 alert("Please fill all fields properly");
@@ -387,10 +496,12 @@
             }
 
             const list = getPortfolio();
+            const record = { symbol, name, shares, buy_price, buy_date };
+
             if (editingIndex !== null) {
-                list[editingIndex] = { symbol, name, shares, buy_price };
+                list[editingIndex] = record;
             } else {
-                list.push({ symbol, name, shares, buy_price });
+                list.push(record);
             }
 
             savePortfolio(list);
@@ -407,6 +518,8 @@
             }
         }
 
+        // Initialize Settings & App
+        loadSettingsUI();
         refreshPrices();
     </script>
 </body>
