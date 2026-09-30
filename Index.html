@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSE Iron Rules Portfolio Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-slate-800 gap-4">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold rounded-full">Automated Strategy Engine</span>
+                    <span id="status-indicator" class="text-xs text-slate-500">~15m Delayed Data</span>
+                </div>
+                <h1 class="text-3xl font-black tracking-tight text-white mt-2">CSE Iron Rules Monitor</h1>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="refreshPrices()" class="bg-slate-800 hover:bg-slate-700 text-sm px-4 py-2 rounded-lg border border-slate-700 font-medium">🔄 Refresh Prices</button>
+                <button onclick="openModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-lg shadow-emerald-900/30">+ Add Holding</button>
+            </div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 my-6">
+            <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800">
+                <p class="text-xs text-slate-400 font-medium tracking-wide">PORTFOLIO VALUE</p>
+                <h3 id="total-val" class="text-2xl font-bold mt-1 text-slate-100">LKR 0.00</h3>
+            </div>
+            <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800">
+                <p class="text-xs text-slate-400 font-medium tracking-wide">INVESTED (INC. 1.12% FEE)</p>
+                <h3 id="total-inv" class="text-2xl font-bold mt-1 text-slate-400">LKR 0.00</h3>
+            </div>
+            <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800">
+                <p class="text-xs text-slate-400 font-medium tracking-wide">TOTAL NET P&L</p>
+                <h3 id="total-pnl" class="text-2xl font-bold mt-1">LKR 0.00</h3>
+            </div>
+            <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800">
+                <p class="text-xs text-slate-400 font-medium tracking-wide">PORTFOLIO ROI</p>
+                <h3 id="total-roi" class="text-2xl font-bold mt-1">0.00%</h3>
+            </div>
+        </div>
+
+        <!-- Holdings & Strategy Table -->
+        <div class="bg-slate-900/80 rounded-xl border border-slate-800 p-6 overflow-x-auto shadow-xl">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-slate-200">Active Positions & Automated Signals</h2>
+                <span class="text-xs text-slate-400">Rules evaluate automatically against current market price</span>
+            </div>
+
+            <table class="w-full text-left text-sm">
+                <thead class="text-xs uppercase text-slate-400 border-b border-slate-800 bg-slate-950/50">
+                    <tr>
+                        <th class="py-3 px-3">Ticker</th>
+                        <th class="py-3 px-3">Qty</th>
+                        <th class="py-3 px-3">Avg Buy</th>
+                        <th class="py-3 px-3">Current Price</th>
+                        <th class="py-3 px-3">ROI (%)</th>
+                        <th class="py-3 px-3">Iron Rule Signal</th>
+                        <th class="py-3 px-3">Action Details</th>
+                        <th class="py-3 px-3 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="holdings-body" class="divide-y divide-slate-800/60">
+                    <!-- Dynamic Rows -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Strategy Reference Footer -->
+        <div class="mt-8 p-5 bg-slate-900/40 rounded-xl border border-slate-800/80">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Active Iron Rules Reference:</h4>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2 text-xs text-slate-400">
+                <div>📉 -40%: <span class="text-emerald-400 font-semibold">Buy +50%</span></div>
+                <div>📉 -20%: <span class="text-emerald-400 font-semibold">Buy +15%</span></div>
+                <div>➡️ -10% to +30%: <span class="text-blue-400 font-semibold">Hold</span></div>
+                <div>📈 +50%: <span class="text-amber-400 font-semibold">Sell 20%</span></div>
+                <div>📈 +80%: <span class="text-amber-400 font-semibold">Sell 30%</span></div>
+                <div>🚀 +120%: <span class="text-rose-400 font-semibold">Sell 50%</span></div>
+                <div>🚀 +200%: <span class="text-rose-400 font-semibold">Sell 70%</span></div>
+                <div>🎯 +300%: <span class="text-rose-500 font-bold">Sell 100%</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Adding Stock -->
+    <div id="addModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 border border-slate-700 p-6 rounded-xl w-full max-w-md shadow-2xl">
+            <h2 class="text-xl font-bold mb-4 text-white">Add CSE Stock Position</h2>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs text-slate-400">CSE Ticker Symbol (e.g. JKH.N0000)</label>
+                    <input id="symbol" type="text" placeholder="JKH.N0000" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400">Company Name</label>
+                    <input id="name" type="text" placeholder="John Keells Holdings" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400">Total Shares Owned</label>
+                    <input id="shares" type="number" placeholder="500" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400">Average Buy Price (LKR)</label>
+                    <input id="buy_price" type="number" step="0.01" placeholder="195.00" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-sm mt-1 focus:border-emerald-500 outline-none">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded text-sm font-medium">Cancel</button>
+                <button onclick="addStock()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded text-sm font-bold text-white shadow-lg">Save Position</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CSE_FEE = 0.0112; // 1.12% fee
+        const colorClasses = {
+            emerald: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30",
+            amber: "bg-amber-500/10 text-amber-400 border border-amber-500/30",
+            rose: "bg-rose-500/10 text-rose-400 border border-rose-500/30",
+            blue: "bg-blue-500/10 text-blue-400 border border-blue-500/30"
+        };
+
+        const defaultPortfolio = [
+            { symbol: "JKH.N0000", name: "John Keells Holdings", shares: 500, buy_price: 190.00 },
+            { symbol: "COMB.N0000", name: "Commercial Bank", shares: 1000, buy_price: 55.00 },
+            { symbol: "SAMP.N0000", name: "Sampath Bank", shares: 800, buy_price: 110.00 }
+        ];
+
+        function getPortfolio() {
+            const saved = localStorage.getItem('cse_portfolio');
+            return saved ? JSON.parse(saved) : defaultPortfolio;
+        }
+
+        function savePortfolio(data) {
+            localStorage.setItem('cse_portfolio', JSON.stringify(data));
+        }
+
+        function evaluateRules(roi, shares, price) {
+            if (roi >= 300) {
+                return { signal: "SELL 100%", color: "rose", rule: "Rule 10", action: `Sell all ${shares} shares (~LKR ${(shares*price*(1-CSE_FEE)).toLocaleString()})` };
+            } else if (roi >= 200) {
+                const s = Math.ceil(shares * 0.70);
+                return { signal: "SELL 70%", color: "rose", rule: "Rule 9", action: `Sell ${s} shares (~LKR ${(s*price*(1-CSE_FEE)).toLocaleString()})` };
+            } else if (roi >= 120) {
+                const s = Math.ceil(shares * 0.50);
+                return { signal: "SELL 50%", color: "amber", rule: "Rule 8", action: `Sell ${s} shares (~LKR ${(s*price*(1-CSE_FEE)).toLocaleString()})` };
+            } else if (roi >= 80) {
+                const s = Math.ceil(shares * 0.30);
+                return { signal: "SELL 30%", color: "amber", rule: "Rule 7", action: `Sell ${s} shares (~LKR ${(s*price*(1-CSE_FEE)).toLocaleString()})` };
+            } else if (roi >= 50) {
+                const s = Math.ceil(shares * 0.20);
+                return { signal: "SELL 20%", color: "amber", rule: "Rule 6", action: `Sell ${s} shares (~LKR ${(s*price*(1-CSE_FEE)).toLocaleString()})` };
+            } else if (roi <= -40) {
+                const s = Math.ceil(shares * 0.50);
+                return { signal: "BUY +50%", color: "emerald", rule: "Rule 3", action: `Buy +${s} shares (~LKR ${(s*price*(1+CSE_FEE)).toLocaleString()})` };
+            } else if (roi <= -20) {
+                const s = Math.ceil(shares * 0.15);
+                return { signal: "BUY +15%", color: "emerald", rule: "Rule 2", action: `Buy +${s} shares (~LKR ${(s*price*(1+CSE_FEE)).toLocaleString()})` };
+            }
+            return { signal: "HOLD", color: "blue", rule: "Rules 1, 4, 5", action: "Keep holding position" };
+        }
+
+        async function fetchStockPrice(ticker) {
+            const sym = ticker.toUpperCase().endsWith('.CM') ? ticker : `${ticker}.CM`;
+            const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=5d`;
+            try {
+                // Using open CORS bridge
+                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+                const data = await res.json();
+                const parsed = JSON.parse(data.contents);
+                const closePrices = parsed.chart.result[0].indicators.quote[0].close;
+                const cleanCloses = closePrices.filter(p => p !== null);
+                return cleanCloses[cleanCloses.length - 1];
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function refreshPrices() {
+            document.getElementById('status-indicator').innerText = "Fetching latest quotes...";
+            const portfolio = getPortfolio();
+            const tbody = document.getElementById('holdings-body');
+            tbody.innerHTML = '';
+
+            let totalInv = 0, totalVal = 0;
+
+            for (let i = 0; i < portfolio.length; i++) {
+                const item = portfolio[i];
+                let currentPrice = await fetchStockPrice(item.symbol);
+                if (!currentPrice) currentPrice = item.buy_price;
+
+                const cost = (item.shares * item.buy_price) * (1 + CSE_FEE);
+                const value = (item.shares * currentPrice) * (1 - CSE_FEE);
+                const pnl = value - cost;
+                const roi = (pnl / cost) * 100;
+                const advice = evaluateRules(roi, item.shares, currentPrice);
+
+                totalInv += cost;
+                totalVal += value;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/30 transition-colors";
+                tr.innerHTML = `
+                    <td class="py-3.5 px-3 font-medium">
+                        <div class="text-white font-semibold">${item.symbol}</div>
+                        <div class="text-xs text-slate-500">${item.name}</div>
+                    </td>
+                    <td class="py-3.5 px-3 font-mono">${item.shares.toLocaleString()}</td>
+                    <td class="py-3.5 px-3 font-mono">${item.buy_price.toFixed(2)}</td>
+                    <td class="py-3.5 px-3 text-white font-bold font-mono">${currentPrice.toFixed(2)}</td>
+                    <td class="py-3.5 px-3 font-bold ${roi >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-mono">
+                        ${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%
+                    </td>
+                    <td class="py-3.5 px-3">
+                        <span class="px-2.5 py-1 text-xs font-bold rounded-md ${colorClasses[advice.color]}">
+                            ${advice.signal}
+                        </span>
+                    </td>
+                    <td class="py-3.5 px-3 text-xs text-slate-300">
+                        <div>${advice.action}</div>
+                        <div class="text-[10px] text-slate-500">${advice.rule}</div>
+                    </td>
+                    <td class="py-3.5 px-3 text-right">
+                        <button onclick="deleteStock(${i})" class="text-slate-500 hover:text-rose-400 text-xs font-semibold">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
+
+            const totalPnl = totalVal - totalInv;
+            const totalRoi = totalInv > 0 ? (totalPnl / totalInv) * 100 : 0;
+
+            document.getElementById('total-val').innerText = 'LKR ' + totalVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('total-inv').innerText = 'LKR ' + totalInv.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            const pnlEl = document.getElementById('total-pnl');
+            pnlEl.innerText = (totalPnl >= 0 ? '+LKR ' : '-LKR ') + Math.abs(totalPnl).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            pnlEl.className = `text-2xl font-bold mt-1 ${totalPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+            const roiEl = document.getElementById('total-roi');
+            roiEl.innerText = `${totalRoi >= 0 ? '+' : ''}${totalRoi.toFixed(2)}%`;
+            roiEl.className = `text-2xl font-bold mt-1 ${totalRoi >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+            document.getElementById('status-indicator').innerText = `Updated at ${new Date().toLocaleTimeString()}`;
+        }
+
+        function openModal() { document.getElementById('addModal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('addModal').classList.add('hidden'); }
+
+        function addStock() {
+            const symbol = document.getElementById('symbol').value.trim().toUpperCase();
+            const name = document.getElementById('name').value.trim() || symbol;
+            const shares = parseInt(document.getElementById('shares').value);
+            const buy_price = parseFloat(document.getElementById('buy_price').value);
+
+            if (!symbol || isNaN(shares) || isNaN(buy_price)) {
+                alert("Please fill all fields properly");
+                return;
+            }
+
+            const list = getPortfolio();
+            list.push({ symbol, name, shares, buy_price });
+            savePortfolio(list);
+            closeModal();
+            refreshPrices();
+        }
+
+        function deleteStock(index) {
+            if (confirm("Delete this stock?")) {
+                const list = getPortfolio();
+                list.splice(index, 1);
+                savePortfolio(list);
+                refreshPrices();
+            }
+        }
+
+        refreshPrices();
+    </script>
+</body>
+</html>
