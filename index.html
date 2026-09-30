@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSE Iron Rules & Real Value Portfolio Tracker</title>
+    <title>CSE Iron Rules & Performance Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -18,7 +18,7 @@
                     <span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold rounded-full">Automated Strategy Engine</span>
                     <span id="status-indicator" class="text-xs text-slate-500">~15m Delayed Data</span>
                 </div>
-                <h1 class="text-3xl font-black tracking-tight text-white mt-2">CSE Iron Rules & Real Value Monitor</h1>
+                <h1 class="text-3xl font-black tracking-tight text-white mt-2">CSE Performance & Iron Rules Dashboard</h1>
             </div>
             <div class="flex flex-wrap gap-2">
                 <button onclick="toggleInflationView()" id="inflation-btn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold px-4 py-2 rounded-lg border border-slate-700 transition-all">
@@ -48,28 +48,55 @@
 
             <!-- Status Indicator -->
             <div class="flex items-center justify-between bg-slate-950/60 p-3 rounded-lg border border-slate-800/80">
-                <span class="text-slate-400">P&L Calculation Mode:</span>
+                <span class="text-slate-400">Calculation Mode:</span>
                 <span id="mode-badge" class="px-2.5 py-0.5 rounded font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">Nominal LKR</span>
             </div>
         </div>
 
         <!-- Metric Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 my-6">
-            <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800">
+            <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 shadow-lg">
                 <p class="text-xs text-slate-400 font-medium tracking-wide">PORTFOLIO VALUE</p>
                 <h3 id="total-val" class="text-2xl font-bold mt-1 text-slate-100">LKR 0.00</h3>
             </div>
-            <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800">
+            <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 shadow-lg">
                 <p id="cost-label" class="text-xs text-slate-400 font-medium tracking-wide">TOTAL INVESTED COST</p>
                 <h3 id="total-inv" class="text-2xl font-bold mt-1 text-slate-400">LKR 0.00</h3>
             </div>
-            <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800">
+            <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 shadow-lg">
                 <p id="pnl-label" class="text-xs text-slate-400 font-medium tracking-wide">NET PROFIT / LOSS</p>
                 <h3 id="total-pnl" class="text-2xl font-bold mt-1">LKR 0.00</h3>
             </div>
-            <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800">
+            <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 shadow-lg">
                 <p id="roi-label" class="text-xs text-slate-400 font-medium tracking-wide">TOTAL RETURN (ROI)</p>
                 <h3 id="total-roi" class="text-2xl font-bold mt-1">0.00%</h3>
+            </div>
+        </div>
+
+        <!-- Interactive Performance Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 my-6">
+            <!-- Cost vs Current Value Performance Chart -->
+            <div class="lg:col-span-2 bg-slate-900/80 p-5 rounded-xl border border-slate-800 shadow-xl flex flex-col justify-between">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-200">Holdings Performance (Cost vs Market Value)</h3>
+                        <p class="text-xs text-slate-400">Compare what you invested against current portfolio value</p>
+                    </div>
+                </div>
+                <div class="w-full h-64">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Asset Allocation Doughnut Chart -->
+            <div class="bg-slate-900/80 p-5 rounded-xl border border-slate-800 shadow-xl flex flex-col items-center justify-between">
+                <div class="w-full mb-2">
+                    <h3 class="text-base font-bold text-slate-200">Portfolio Allocation</h3>
+                    <p class="text-xs text-slate-400">Weight distribution across holdings</p>
+                </div>
+                <div class="w-full max-w-[220px] h-56 flex items-center justify-center">
+                    <canvas id="allocationChart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -170,7 +197,6 @@
     <script>
         // Comprehensive CSE Ticker Database
         const CSE_ALL_TICKERS = [
-            // Banking, Finance & Insurance
             { symbol: "COMB.N0000", name: "Commercial Bank of Ceylon (Voting)" },
             { symbol: "COMB.X0000", name: "Commercial Bank of Ceylon (Non-Voting)" },
             { symbol: "SAMP.N0000", name: "Sampath Bank PLC" },
@@ -182,158 +208,59 @@
             { symbol: "DFCC.N0000", name: "DFCC Bank PLC" },
             { symbol: "PABC.N0000", name: "Pan Asia Banking Corporation" },
             { symbol: "NDB.N0000", name: "National Development Bank PLC" },
-            { symbol: "UBC.N0000", name: "Union Bank of Colombo" },
             { symbol: "LOLC.N0000", name: "LOLC Holdings PLC" },
             { symbol: "LOFC.N0000", name: "LOLC Finance PLC" },
             { symbol: "CDB.N0000", name: "Citizens Development Business Finance" },
-            { symbol: "CDB.X0000", name: "Citizens Development Business (Non-Voting)" },
             { symbol: "CFIN.N0000", name: "Central Finance Company" },
             { symbol: "LFIN.N0000", name: "LB Finance PLC" },
             { symbol: "PLC.N0000", name: "People's Leasing & Finance" },
-            { symbol: "VFIN.N0000", name: "Vallibel Finance PLC" },
-            { symbol: "SFIN.N0000", name: "Singer Finance Lanka" },
             { symbol: "CALT.N0000", name: "Capital Alliance PLC" },
             { symbol: "FCT.N0000", name: "First Capital Holdings PLC" },
-            { symbol: "COCR.N0000", name: "Commercial Credit and Finance" },
-            { symbol: "ALLI.N0000", name: "Alliance Finance Company" },
-            { symbol: "MERC.N0000", name: "Mercantile Investments" },
             { symbol: "AAIC.N0000", name: "Softlogic Life Insurance" },
             { symbol: "JINS.N0000", name: "Janashakthi Insurance PLC" },
-            { symbol: "CINS.N0000", name: "Ceylinco Insurance (Voting)" },
-            { symbol: "CINS.X0000", name: "Ceylinco Insurance (Non-Voting)" },
-            { symbol: "UAL.N0000", name: "Union Assurance PLC" },
-            { symbol: "HNBAC.N0000", name: "HNB Assurance PLC" },
-            { symbol: "SLIC.N0000", name: "Sri Lanka Insurance Corporation" },
-
-            // Diversified & Conglomerates
+            { symbol: "CINS.N0000", name: "Ceylinco Insurance PLC" },
             { symbol: "JKH.N0000", name: "John Keells Holdings PLC" },
             { symbol: "HAYL.N0000", name: "Hayleys PLC" },
             { symbol: "BIL.N0000", name: "Browns Investments PLC" },
-            { symbol: "BRWN.N0000", name: "Brown & Company PLC" },
             { symbol: "MELS.N0000", name: "Melstacorp PLC" },
             { symbol: "HHL.N0000", name: "Hemas Holdings PLC" },
             { symbol: "VONE.N0000", name: "Vallibel One PLC" },
             { symbol: "SPEN.N0000", name: "Aitken Spence PLC" },
             { symbol: "RICH.N0000", name: "Richard Pieris and Company" },
             { symbol: "EXPO.N0000", name: "Expolanka Holdings PLC" },
-            { symbol: "SUN.N0000", name: "Sunshine Holdings PLC" },
-            { symbol: "CIND.N0000", name: "Ceylon Investment PLC" },
-            { symbol: "CINV.N0000", name: "Ceylon Guardian Investment Trust" },
-            { symbol: "SHL.N0000", name: "Softlogic Holdings PLC" },
-            { symbol: "AMBE.N0000", name: "Ambeon Capital PLC" },
-            { symbol: "ASIY.N0000", name: "Asia Asset Finance" },
-            { symbol: "RENU.N0000", name: "Renuka Holdings PLC" },
-            { symbol: "RHL.N0000", name: "RIL Property PLC" },
-            { symbol: "CTHR.N0000", name: "C T Holdings PLC" },
-
-            // Energy, Materials & Industrial Manufacturing
             { symbol: "LIOC.N0000", name: "Lanka IOC PLC" },
-            { symbol: "LGL.N0000", name: "LAUGFS Gas PLC (Voting)" },
-            { symbol: "LGL.X0000", name: "LAUGFS Gas PLC (Non-Voting)" },
             { symbol: "WIND.N0000", name: "WindForce PLC" },
-            { symbol: "HPWR.N0000", name: "Lotus Hydroelectric / HPWR" },
-            { symbol: "PAP.N0000", name: "Panasian Power PLC" },
-            { symbol: "LVL.N0000", name: "LVL Energy Fund PLC" },
-            { symbol: "VPEL.N0000", name: "Vallibel Power Erathna" },
+            { symbol: "LGL.N0000", name: "LAUGFS Gas PLC" },
             { symbol: "RCL.N0000", name: "Royal Ceramics Lanka PLC" },
-            { symbol: "TKYO.N0000", name: "Tokyo Cement Company (Voting)" },
-            { symbol: "TKYO.X0000", name: "Tokyo Cement Company (Non-Voting)" },
+            { symbol: "TKYO.N0000", name: "Tokyo Cement Company" },
             { symbol: "ACL.N0000", name: "ACL Cables PLC" },
             { symbol: "AEL.N0000", name: "Access Engineering PLC" },
             { symbol: "DIPD.N0000", name: "Dipped Products PLC" },
             { symbol: "TJL.N0000", name: "Teejay Lanka PLC" },
             { symbol: "LLUB.N0000", name: "Chevron Lubricants Lanka" },
-            { symbol: "ALUM.N0000", name: "Alumex PLC" },
-            { symbol: "DOCK.N0000", name: "Colombo Dockyard PLC" },
-            { symbol: "LANK.N0000", name: "Lanka Walltiles PLC" },
-            { symbol: "PARQ.N0000", name: "Swisstek (Ceylon) PLC" },
-            { symbol: "GLAS.N0000", name: "PGP Glass Ceylon PLC" },
-            { symbol: "PACK.N0000", name: "Ex-pack Corrugated Cartons" },
-            { symbol: "REXP.N0000", name: "Resus Energy PLC" },
-            { symbol: "AGST.N0000", name: "Agstar PLC" },
-            { symbol: "CERA.N0000", name: "Lanka Ceramic PLC" },
-            { symbol: "BOPL.N0000", name: "Bogala Graphite Lanka" },
-
-            // Food, Beverage, Tobacco & Agriculture
             { symbol: "CTC.N0000", name: "Ceylon Tobacco Company PLC" },
             { symbol: "DIST.N0000", name: "Distilleries Company of Sri Lanka" },
             { symbol: "LION.N0000", name: "Lion Brewery Ceylon PLC" },
             { symbol: "CARG.N0000", name: "Cargills (Ceylon) PLC" },
             { symbol: "NEST.N0000", name: "Nestle Lanka PLC" },
             { symbol: "CCS.N0000", name: "Ceylon Cold Stores PLC" },
-            { symbol: "KFP.N0000", name: "Keells Food Products" },
-            { symbol: "LMF.N0000", name: "Lanka Milk Foods PLC" },
-            { symbol: "SOY.N0000", name: "Convenience Foods Lanka" },
-            { symbol: "BFL.N0000", name: "Bairaha Farms PLC" },
-            { symbol: "GRAN.N0000", name: "Ceylon Grain Elevators PLC" },
-            { symbol: "TAFL.N0000", name: "Three Acre Farms PLC" },
             { symbol: "WATA.N0000", name: "Watawala Plantations PLC" },
-            { symbol: "KELN.N0000", name: "Kelani Valley Plantations" },
-            { symbol: "DPL.N0000", name: "Dipped Products Plantations" },
-            { symbol: "ELP.N0000", name: "Elpitiya Plantations PLC" },
-            { symbol: "AGAL.N0000", name: "Agalawatte Plantations" },
-            { symbol: "BOGA.N0000", name: "Bogawantalawa Tea Estates" },
-            { symbol: "HOPL.N0000", name: "Horana Plantations PLC" },
-            { symbol: "KOTA.N0000", name: "Kotagala Plantations PLC" },
-            { symbol: "MADU.N0000", name: "Madulsima Plantations PLC" },
-            { symbol: "MASK.N0000", name: "Maskeliya Plantations PLC" },
-            { symbol: "MAL.N0000", name: "Malwatte Valley Plantations" },
-            { symbol: "NAMU.N0000", name: "Namunukula Plantations PLC" },
-            { symbol: "TAL.N0000", name: "Talawakelle Tea Estates" },
-            { symbol: "UDAP.N0000", name: "Udapussellawa Plantations" },
-            { symbol: "BALA.N0000", name: "Balangoda Plantations PLC" },
-            { symbol: "HEXP.N0000", name: "Hayleys Fabric PLC" },
-
-            // Telecommunications & Technology
             { symbol: "DIAL.N0000", name: "Dialog Axiata PLC" },
             { symbol: "SLTL.N0000", name: "Sri Lanka Telecom PLC" },
-            { symbol: "ECL.N0000", name: "E - Channelling PLC" },
-
-            // Healthcare & Pharmaceuticals
             { symbol: "ASIR.N0000", name: "Asiri Hospital Holdings PLC" },
-            { symbol: "AMSL.N0000", name: "Asiri Surgical Hospital PLC" },
             { symbol: "CHL.N0000", name: "Ceylon Hospitals PLC (Durdans)" },
-            { symbol: "CHL.X0000", name: "Ceylon Hospitals (Non-Voting)" },
             { symbol: "LHCL.N0000", name: "Lanka Hospitals Corporation" },
-            { symbol: "NHL.N0000", name: "Nawaloka Hospitals PLC" },
-            { symbol: "MULL.N0000", name: "Muller & Phipps Ceylon" },
-
-            // Consumer Retail & Services
             { symbol: "ODEL.N0000", name: "ODEL PLC" },
             { symbol: "SINS.N0000", name: "Singer (Sri Lanka) PLC" },
-            { symbol: "ABAN.N0000", name: "Abans Electricals PLC" },
-            { symbol: "SING.N0000", name: "Singer Industries Ceylon" },
-            { symbol: "KAPI.N0000", name: "Kapruka Holdings PLC" },
-            { symbol: "TESS.N0000", name: "Tess Agro PLC" },
-
-            // Hotels, Tourism & Leisure
             { symbol: "AHUN.N0000", name: "Aitken Spence Hotel Holdings" },
-            { symbol: "AHOT.N0000", name: "Asian Hotels and Properties" },
             { symbol: "KHL.N0000", name: "John Keells Hotels PLC" },
-            { symbol: "TRAN.N0000", name: "Trans Asia Hotels PLC" },
-            { symbol: "EDEN.N0000", name: "Eden Hotel Lanka PLC" },
-            { symbol: "BERU.N0000", name: "Beruwala Resorts PLC" },
-            { symbol: "PALM.N0000", name: "Palm Garden Hotels PLC" },
-            { symbol: "CHOT.N0000", name: "Ceylon Hotels Corporation" },
-            { symbol: "SIGV.N0000", name: "Sigiriya Village Hotels" },
-            { symbol: "SERV.N0000", name: "Serendib Hotels PLC" },
-            { symbol: "CONN.N0000", name: "The Fortress Resorts PLC" },
-            { symbol: "MARA.N0000", name: "Marawila Resorts PLC" },
-            { symbol: "TAFR.N0000", name: "Tangerine Beach Hotels" },
-            { symbol: "RHTL.N0000", name: "Renuka Hotels PLC" },
-            { symbol: "CITR.N0000", name: "Citrus Leisure PLC" },
-
-            // Real Estate & Property
-            { symbol: "OSEA.N0000", name: "Overseas Realty (Ceylon) PLC" },
-            { symbol: "COLR.N0000", name: "Colombo Land and Development" },
-            { symbol: "EAST.N0000", name: "Eastern Merchants PLC" },
-            { symbol: "ONAL.N0000", name: "On'ally Holdings PLC" },
-            { symbol: "PDL.N0000", name: "Property Development PLC" },
-            { symbol: "CTBL.N0000", name: "Ceylon Tea Brokers PLC" }
+            { symbol: "OSEA.N0000", name: "Overseas Realty (Ceylon) PLC" }
         ];
 
         let isRealInflationView = false;
         let editingIndex = null;
+        let perfChartInstance = null;
+        let allocChartInstance = null;
 
         const colorClasses = {
             emerald: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30",
@@ -344,7 +271,7 @@
 
         const defaultPortfolio = [
             { symbol: "JKH.N0000", name: "John Keells Holdings PLC", shares: 500, buy_price: 190.00, buy_date: "2023-05-10" },
-            { symbol: "COMB.N0000", name: "Commercial Bank of Ceylon (Voting)", shares: 1000, buy_price: 55.00, buy_date: "2022-11-20" },
+            { symbol: "COMB.N0000", name: "Commercial Bank of Ceylon", shares: 1000, buy_price: 55.00, buy_date: "2022-11-20" },
             { symbol: "SAMP.N0000", name: "Sampath Bank PLC", shares: 800, buy_price: 110.00, buy_date: "2024-01-15" }
         ];
 
@@ -423,10 +350,10 @@
             const matched = CSE_ALL_TICKERS.filter(t => 
                 t.symbol.toLowerCase().includes(query) || 
                 t.name.toLowerCase().includes(query)
-            ).slice(0, 8); // Top 8 matches
+            ).slice(0, 8);
 
             if (matched.length === 0) {
-                resultsBox.innerHTML = `<div class="p-3 text-xs text-slate-500">No matching stock found. Enter custom ticker below.</div>`;
+                resultsBox.innerHTML = `<div class="p-3 text-xs text-slate-500">No stock found. Type symbol below.</div>`;
                 resultsBox.classList.remove('hidden');
                 return;
             }
@@ -491,6 +418,67 @@
             }
         }
 
+        function updateCharts(labels, costs, values) {
+            // 1. Performance Bar Chart (Cost vs Value)
+            const ctxBar = document.getElementById('performanceChart').getContext('2d');
+            if (perfChartInstance) perfChartInstance.destroy();
+
+            perfChartInstance = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: isRealInflationView ? 'Real Cost (LKR)' : 'Invested Cost (LKR)',
+                            data: costs,
+                            backgroundColor: '#64748b',
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Market Value (LKR)',
+                            data: values,
+                            backgroundColor: '#10b981',
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 } } },
+                        y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1', boxWidth: 12, font: { size: 11 } } }
+                    }
+                }
+            });
+
+            // 2. Allocation Doughnut Chart
+            const ctxPie = document.getElementById('allocationChart').getContext('2d');
+            if (allocChartInstance) allocChartInstance.destroy();
+
+            allocChartInstance = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6', '#f97316'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 10, font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
         async function refreshPrices() {
             document.getElementById('status-indicator').innerText = "Fetching latest quotes...";
             const portfolio = getPortfolio();
@@ -500,6 +488,10 @@
 
             let totalInv = 0, totalVal = 0;
             const now = new Date();
+
+            const chartLabels = [];
+            const chartCosts = [];
+            const chartValues = [];
 
             for (let i = 0; i < portfolio.length; i++) {
                 const item = portfolio[i];
@@ -521,6 +513,10 @@
 
                 totalInv += activeCost;
                 totalVal += nominalValue;
+
+                chartLabels.push(item.symbol.replace('.N0000', '').replace('.X0000', ''));
+                chartCosts.push(Math.round(activeCost));
+                chartValues.push(Math.round(nominalValue));
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-800/30 transition-colors";
@@ -572,6 +568,9 @@
             roiEl.className = `text-2xl font-bold mt-1 ${totalRoi >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
             document.getElementById('status-indicator').innerText = `Updated at ${new Date().toLocaleTimeString()}`;
+
+            // Render Charts
+            updateCharts(chartLabels, chartCosts, chartValues);
         }
 
         function openModal(index = null) {
@@ -645,7 +644,6 @@
             }
         }
 
-        // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
             const searchBox = document.getElementById('ticker-search');
             const resultsBox = document.getElementById('ticker-results');
@@ -654,7 +652,6 @@
             }
         });
 
-        // Initialize Settings & App
         loadSettingsUI();
         refreshPrices();
     </script>
